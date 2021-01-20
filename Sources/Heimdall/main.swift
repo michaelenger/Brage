@@ -5,4 +5,4 @@
  */
 
 let cli = CLI()
-cli.run()
+try cli.run()
