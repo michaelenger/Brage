@@ -4,23 +4,20 @@
  *  MIT license, see LICENSE file for details
  */
 
-import Files
-
 public struct CLI {
 	public func run(arguments: [String] = CommandLine.arguments) throws {
 		guard arguments.count > 1 else {
 			return showHelp()
 		}
 
-		let siteDirectory = arguments.count > 2
-			? try Folder(path: arguments[2])
-			: Folder.current
+		let siteDirectory = arguments.count > 2 ? arguments[2] : nil
 
 		switch arguments[1] {
 		case "new":
 			print("TODO")
 		case "build":
-			print("BUILD: \(siteDirectory)")
+			let builder = try Builder(basedOn: siteDirectory)
+			builder.build(at: "lol")
 		case "serve":
 			print("TODO")
 		default:
