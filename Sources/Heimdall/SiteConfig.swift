@@ -9,7 +9,7 @@ import Yaml
 public struct SiteConfig {
 	public let title: String
 	public let description: String?
-	public let layout: String
+	public let image: String?
 }
 
 public func parseConfig(from text: String) throws -> SiteConfig {
@@ -22,7 +22,7 @@ public func parseConfig(from text: String) throws -> SiteConfig {
 	return SiteConfig(
 		title: config["title"].string!,
 		description: config["description"].string,
-		layout: config["layout"].string ?? "layout.leaf"
+		image: config["image"].string
 	)
 }
 
