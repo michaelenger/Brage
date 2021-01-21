@@ -17,7 +17,7 @@ public struct CLI {
 			print("TODO")
 		case "build":
 			let builder = try Builder(basedOn: siteDirectory)
-			builder.build(at: "lol")
+			try builder.build()
 		case "serve":
 			print("TODO")
 		default:

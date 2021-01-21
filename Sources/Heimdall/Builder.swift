@@ -6,6 +6,7 @@
 
 import Files
 import Foundation
+import Mustache
 
 public struct Builder {
 	private let config: SiteConfig
@@ -21,7 +22,7 @@ public struct Builder {
 		}
 
 		do {
-			let configText = try File(path: "\(siteDirectory.path)site.yml")
+			let configText = try siteDirectory.file(at: "site.yml")
 				.readAsString()
 
 			self.config = try parseConfig(from: configText)
@@ -29,16 +30,45 @@ public struct Builder {
 		} catch is FilesError<LocationErrorReason> {
 			throw BuilderError.missingSiteConfig
 		}
-
-		print(config)
 	}
 
-	public func build(at path: String) {
-		// TODO
+	public func build() throws {
+		var indexTemplate: String = ""
+		do {
+			indexTemplate = try siteDirectory.file(at: "index.mustache")
+				.readAsString()
+		} catch is FilesError<LocationErrorReason> {
+			throw BuilderError.missingIndexTemplate
+		}
+
+		// Clear and create build directory
+		do {
+			let buildDirectory = try siteDirectory.subfolder(at: "build")
+			try buildDirectory.delete()
+		} catch is FilesError<LocationErrorReason> {
+			// this is fine 🔥
+		}
+		let buildDirectory = try siteDirectory.createSubfolder(at: "build")
+
+		// Render index template
+		let targetFile = try buildDirectory.createFile(at: "index.html")
+		let content = try renderTemplate(from: indexTemplate)
+		try targetFile.write(content)
+	}
+
+	private func renderTemplate(from source: String) throws -> String {
+		let template = try Template(string: source)
+
+		let data = [
+			"site": self.config.dictionary
+		]
+
+		return try template.render(data)
 	}
 }
 
 public enum BuilderError: Error {
+	case missingIndexTemplate
 	case missingSiteDirectory
 	case missingSiteConfig
 }

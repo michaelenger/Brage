@@ -6,7 +6,7 @@
 
 import Yaml
 
-public struct SiteConfig {
+public struct SiteConfig: Codable {
 	public let title: String
 	public let description: String?
 	public let image: String?

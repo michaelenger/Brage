@@ -12,6 +12,8 @@ Run the CLI tool along with any of the commands along with an optional site dire
 heimdall [command] [DIRECTORY]
 ```
 
+The resulting HTML will be placed in a `build` directory.
+
 ### Commands
 
 * `new` Create a new website based on a basic template.
