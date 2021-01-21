@@ -64,6 +64,14 @@ public struct Builder {
 
 		// Render other templates
 		// TODO
+
+		// Copy assets
+		do {
+			let assetsDirectory = try siteDirectory.subfolder(at: "assets")
+			try assetsDirectory.copy(to: buildDirectory)
+		} catch is FilesError<LocationErrorReason> {
+			// no assets to copy
+		}
 	}
 
 	private func renderTemplate(from file: File) throws -> String {

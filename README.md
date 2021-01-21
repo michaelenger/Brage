@@ -44,7 +44,7 @@ The layout template is defined in a `layout.mustache` file at the root of the si
 
 ### Assets
 
-TODO
+Any files in a directory called `assets` will be copied as-is to the build directory.
 
 ### Collections
 
