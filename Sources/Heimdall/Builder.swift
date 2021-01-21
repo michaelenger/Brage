@@ -42,6 +42,14 @@ public struct Builder {
 	}
 
 	public func build() throws {
+		// Get the pages directory
+		let pagesDirectory: Folder?
+		do {
+			pagesDirectory = try siteDirectory.subfolder(at: "pages")
+		} catch is FilesError<LocationErrorReason> {
+			throw BuilderError.missingPagesDirectory
+		}
+
 		// Clear and create build directory
 		do {
 			let buildDirectory = try siteDirectory.subfolder(at: "build")
@@ -53,7 +61,7 @@ public struct Builder {
 
 		// Render index template
 		do {
-			let indexTemplate = try siteDirectory.file(at: "index.mustache")
+			let indexTemplate = try pagesDirectory!.file(at: "index.mustache")
 			let targetFile = try buildDirectory.createFile(at: "index.html")
 			let content = try renderTemplate(from: indexTemplate)
 
@@ -94,6 +102,7 @@ public struct Builder {
 public enum BuilderError: Error {
 	case missingIndexTemplate
 	case missingLayoutTemplate
+	case missingPagesDirectory
 	case missingSiteDirectory
 	case missingSiteConfig
 }

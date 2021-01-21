@@ -42,6 +42,14 @@ The layout template is defined in a `layout.mustache` file at the root of the si
   * `content` Content of the page
   * `path` URI path to the page
 
+### Pages
+
+Pages are defined in files contained in the `pages` directory. They can be either Mustache templates, Markdown files, or YAML files defining content blocks to use.
+
+There is only one required file, `index` which defines the index page. Any other files in the directory will be turned into pages in subfolders so that the path to the generated HTML file is correct based on the template file's location.
+
+For example the file `pages/example/hello.mustache` would become the file `build/example/hello/index.html` and have the URI `/example/hello`.
+
 ### Assets
 
 Any files in a directory called `assets` will be copied as-is to the build directory.
