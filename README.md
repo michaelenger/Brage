@@ -22,15 +22,25 @@ The resulting HTML will be placed in a `build` directory.
 
 ## Site Generation
 
-The site generation is based on YAML files and Mustache templates. The only requirements to start with is a config file and an index template.
+The site generation is based on YAML files and Mustache templates. The only requirements to start with is a config file, a layout template, and an index page.
 
-### Config
+### Config File
 
 The config is defined in a `site.yml` file in the site directory. It defines some basic meta data as well as other contents (explained below).
 
 * `title` Title of the site.
 * `description` Description of the site, used in meta tags.
 * `image` Image used for the icon and social media images.
+
+### Layout Template
+
+The layout template is defined in a `layout.mustache` file at the root of the site directory and is used when generating all the pages. It will be rendered with the following available variables:
+
+* `site` Site meta data (as defined in the config file)
+* `page` Page meta data
+  * `title` Title of the page
+  * `content` Content of the page
+  * `path` URI path to the page
 
 ### Assets
 

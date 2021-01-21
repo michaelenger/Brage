@@ -11,6 +11,7 @@ import Mustache
 public struct Builder {
 	private let config: SiteConfig
 	private let siteDirectory: Folder
+	private let layoutTemplate: Template
 
 	public init(basedOn path: String?) throws {
 		do {
@@ -30,17 +31,17 @@ public struct Builder {
 		} catch is FilesError<LocationErrorReason> {
 			throw BuilderError.missingSiteConfig
 		}
+
+		do {
+			let layoutString = try siteDirectory.file(at: "layout.mustache")
+				.readAsString()
+			layoutTemplate = try Template(string: layoutString)
+		} catch is FilesError<LocationErrorReason> {
+			throw BuilderError.missingLayoutTemplate
+		}
 	}
 
 	public func build() throws {
-		var indexTemplate: String = ""
-		do {
-			indexTemplate = try siteDirectory.file(at: "index.mustache")
-				.readAsString()
-		} catch is FilesError<LocationErrorReason> {
-			throw BuilderError.missingIndexTemplate
-		}
-
 		// Clear and create build directory
 		do {
 			let buildDirectory = try siteDirectory.subfolder(at: "build")
@@ -51,24 +52,40 @@ public struct Builder {
 		let buildDirectory = try siteDirectory.createSubfolder(at: "build")
 
 		// Render index template
-		let targetFile = try buildDirectory.createFile(at: "index.html")
-		let content = try renderTemplate(from: indexTemplate)
-		try targetFile.write(content)
+		do {
+			let indexTemplate = try siteDirectory.file(at: "index.mustache")
+			let targetFile = try buildDirectory.createFile(at: "index.html")
+			let content = try renderTemplate(from: indexTemplate)
+
+			try targetFile.write(content)
+		} catch is FilesError<LocationErrorReason> {
+			throw BuilderError.missingIndexTemplate
+		}
+
+		// Render other templates
+		// TODO
 	}
 
-	private func renderTemplate(from source: String) throws -> String {
-		let template = try Template(string: source)
+	private func renderTemplate(from file: File) throws -> String {
+		let fileContents = try file.readAsString()
+		let template = try Template(string: fileContents)
 
-		let data = [
+		let content = try template.render([
 			"site": self.config.dictionary
-		]
+		])
 
-		return try template.render(data)
+		return try layoutTemplate.render([
+			"site": self.config.dictionary,
+			"page": [
+				"content": content
+			]
+		])
 	}
 }
 
 public enum BuilderError: Error {
 	case missingIndexTemplate
+	case missingLayoutTemplate
 	case missingSiteDirectory
 	case missingSiteConfig
 }
