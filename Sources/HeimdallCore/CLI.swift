@@ -5,6 +5,8 @@
  */
 
 public struct CLI {
+	public init() {}
+
 	public func run(arguments: [String] = CommandLine.arguments) throws {
 		guard arguments.count > 1 else {
 			return showHelp()

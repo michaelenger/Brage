@@ -4,5 +4,7 @@
  *  MIT license, see LICENSE file for details
  */
 
+import HeimdallCore
+
 let cli = CLI()
 try cli.run()

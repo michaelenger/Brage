@@ -82,7 +82,7 @@ public struct Builder {
 		}
 	}
 
-	private func renderTemplate(from file: File) throws -> String {
+	public func renderTemplate(from file: File) throws -> String {
 		let fileContents = try file.readAsString()
 		let template = try Template(string: fileContents)
 
