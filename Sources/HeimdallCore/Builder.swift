@@ -43,7 +43,7 @@ public struct Builder {
 
 	public func build() throws {
 		// Get the pages directory
-		let pagesDirectory: Folder?
+		let pagesDirectory: Folder
 		do {
 			pagesDirectory = try siteDirectory.subfolder(at: "pages")
 		} catch is FilesError<LocationErrorReason> {
@@ -59,19 +59,31 @@ public struct Builder {
 		}
 		let buildDirectory = try siteDirectory.createSubfolder(at: "build")
 
-		// Render index template
-		do {
-			let indexTemplate = try pagesDirectory!.file(at: "index.mustache")
-			let targetFile = try buildDirectory.createFile(at: "index.html")
-			let content = try renderTemplate(from: indexTemplate)
+		// Render templates
+		let files = pagesDirectory.files.recursive
+		var indexFound = false
+		for file in files {
+			var targetDirectory = buildDirectory
+
+			if file.nameExcludingExtension != "index" {
+				let targetPath = file.path(relativeTo: pagesDirectory)
+					.split(separator: ".")
+					.dropLast()
+					.joined()
+				targetDirectory = try buildDirectory.createSubfolder(at: targetPath)
+			} else {
+				indexFound = true
+			}
+
+			let targetFile = try targetDirectory.createFile(at: "index.html")
+			let content = try renderTemplate(from: file)
 
 			try targetFile.write(content)
-		} catch is FilesError<LocationErrorReason> {
-			throw BuilderError.missingIndexTemplate
 		}
 
-		// Render other templates
-		// TODO
+		guard indexFound else {
+			throw BuilderError.missingIndexTemplate
+		}
 
 		// Copy assets
 		do {
