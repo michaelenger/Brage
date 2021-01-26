@@ -35,7 +35,11 @@ The config is defined in a `site.yml` file in the site directory. It defines som
 
 The layout template is defined in a `layout.mustache` file at the root of the site directory and is used when generating all the pages. It will be rendered with the following available variables:
 
-* `site` Site meta data (as defined in the config file)
+* `site` Site meta data
+  * `title` Title of the site.
+  * `description` Description of the site, used in meta tags.
+  * `root` Relative path to the root directory.
+  * `assets` Relative path to the assets directory.
 * `page` Page meta data
   * `title` Title of the page
   * `content` Content of the page

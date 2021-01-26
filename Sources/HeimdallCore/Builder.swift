@@ -59,12 +59,21 @@ public struct Builder {
 		}
 		let buildDirectory = try siteDirectory.createSubfolder(at: "build")
 
+		// Copy assets
+		do {
+			let assetsDirectory = try siteDirectory.subfolder(at: "assets")
+			try assetsDirectory.copy(to: buildDirectory)
+		} catch is FilesError<LocationErrorReason> {
+			// no assets to copy just create the directory
+			_ = try buildDirectory.createSubfolder(at: "assets")
+		}
+
 		// Render templates
 		let files = pagesDirectory.files.recursive
 		var indexFound = false
 		for file in files {
+			// Determine where to render
 			var targetDirectory = buildDirectory
-
 			if file.nameExcludingExtension != "index" {
 				let targetPath = file.path(relativeTo: pagesDirectory)
 					.split(separator: ".")
@@ -75,8 +84,29 @@ public struct Builder {
 				indexFound = true
 			}
 
+			// Build data object
+			let uri = "/\(targetDirectory.path(relativeTo: buildDirectory))"
+			let rootPath = uri != "/"
+				? String(repeating: "../", count: uri.count(of: Character("/")))
+				: "./"
+
+			let data = TemplateData(
+				site: TemplateSiteData(
+					title: self.config.title,
+					description: self.config.description,
+					root: rootPath,
+					assets: "\(rootPath)assets/"
+				),
+				page: TemplatePageData(
+					title: uri == "/" ? "Index" : targetDirectory.name.titleified,
+					path: uri,
+					content: nil
+				)
+			)
+
+			// Render template
 			let targetFile = try targetDirectory.createFile(at: "index.html")
-			let content = try renderTemplate(from: file)
+			let content = try renderTemplate(from: file, data: data)
 
 			try targetFile.write(content)
 		}
@@ -84,29 +114,23 @@ public struct Builder {
 		guard indexFound else {
 			throw BuilderError.missingIndexTemplate
 		}
-
-		// Copy assets
-		do {
-			let assetsDirectory = try siteDirectory.subfolder(at: "assets")
-			try assetsDirectory.copy(to: buildDirectory)
-		} catch is FilesError<LocationErrorReason> {
-			// no assets to copy
-		}
 	}
 
-	public func renderTemplate(from file: File) throws -> String {
+	public func renderTemplate(from file: File, data: TemplateData) throws -> String {
 		let fileContents = try file.readAsString()
 		let template = try Template(string: fileContents)
 
 		let content = try template.render([
-			"site": self.config.dictionary
+			"site": data.site.dictionary,
+			"page": data.page.dictionary,
 		])
 
+		var pageData = data.page
+		pageData.content = content
+
 		return try layoutTemplate.render([
-			"site": self.config.dictionary,
-			"page": [
-				"content": content
-			]
+			"site": data.site.dictionary,
+			"page": pageData.dictionary,
 		])
 	}
 }
@@ -117,4 +141,22 @@ public enum BuilderError: Error {
 	case missingPagesDirectory
 	case missingSiteDirectory
 	case missingSiteConfig
+}
+
+public struct TemplateSiteData: Codable {
+	public let title: String
+	public let description: String?
+	public let root: String
+	public let assets: String
+}
+
+public struct TemplatePageData: Codable {
+	public let title: String
+	public let path: String
+	public var content: String?
+}
+
+public struct TemplateData: Codable {
+	public let site: TemplateSiteData
+	public let page: TemplatePageData
 }

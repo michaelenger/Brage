@@ -73,12 +73,21 @@ final class BuilderTests: XCTestCase {
 		let pageFile = try! pagesDirectory.createFile(
 			named: "testpage.mustache",
 			contents: Data("THIS IS CONTENT".utf8))
+		let templateData = TemplateData(
+			site: TemplateSiteData(
+				title: "Test Page",
+				description: nil,
+				root: "./",
+				assets: "./assets/"
+			),
+			page: TemplatePageData(
+				title: "Index",
+				path: "./",
+				content: nil
+			)
+		)
 
-		let result = try builder.renderTemplate(from: pageFile)
+		let result = try builder.renderTemplate(from: pageFile, data: templateData)
 		XCTAssertEqual(result, "<title>Test Page</title><body>THIS IS CONTENT</body>")
 	}
-
-	static var allTests = [
-		("testRenderTemplate", testRenderTemplateMustache),
-	]
 }
