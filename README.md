@@ -30,7 +30,6 @@ The config is defined in a `site.yml` file in the site directory. It defines som
 
 * `title` Title of the site.
 * `description` Description of the site, used in meta tags.
-* `image` Image used for the icon and social media images.
 
 ### Layout Template
 

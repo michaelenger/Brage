@@ -9,7 +9,6 @@ import Yaml
 public struct SiteConfig: Codable {
 	public let title: String
 	public let description: String?
-	public let image: String?
 }
 
 public func parseConfig(from text: String) throws -> SiteConfig {
@@ -21,8 +20,7 @@ public func parseConfig(from text: String) throws -> SiteConfig {
 
 	return SiteConfig(
 		title: config["title"].string!,
-		description: config["description"].string,
-		image: config["image"].string
+		description: config["description"].string
 	)
 }
 
