@@ -24,7 +24,7 @@ The resulting HTML will be placed in a `build` directory.
 
 ## Site Generation
 
-The site generation is based on YAML files and Mustache templates. The only requirements to start with is a config file, a layout template, and an index page.
+The site generation is based on YAML files and Mustache templates. The only requirements to start with is a config file, a layout template, and one or more pages.
 
 ### Config File
 
@@ -51,7 +51,7 @@ The layout template is defined in a `layout.mustache` file at the root of the si
 
 Pages are defined in files contained in the `pages` directory. They can be either Mustache templates, Markdown files, or YAML files defining content blocks to use.
 
-There is only one required file, `index` which defines the index page. Any other files in the directory will be turned into pages in subfolders so that the path to the generated HTML file is correct based on the template file's location.
+There is only one special file, the `index` file, which defines the index page. It will be generated with a resulting URI of `/`. Any other files in the directory will be turned into pages in subfolders so that the path to the generated HTML file is correct based on the template file's location.
 
 For example the file `pages/example/hello.mustache` would become the file `build/example/hello/index.html` and have the URI `/example/hello`.
 

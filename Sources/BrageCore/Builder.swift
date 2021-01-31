@@ -67,7 +67,6 @@ public struct Builder {
 
 		// Render templates
 		let files = pagesDirectory.files.recursive
-		var indexFound = false
 		for file in files {
 			// Determine where to render
 			var targetDirectory = buildDirectory
@@ -77,8 +76,6 @@ public struct Builder {
 					.dropLast()
 					.joined()
 				targetDirectory = try buildDirectory.createSubfolder(at: targetPath)
-			} else {
-				indexFound = true
 			}
 
 			// Build data object
@@ -116,10 +113,6 @@ public struct Builder {
 
 			try targetFile.write(content)
 		}
-
-		guard indexFound else {
-			throw BuilderError.missingIndexTemplate
-		}
 	}
 
 	public func renderMustacheTemplate(from file: File, data: TemplateData) throws -> String {
@@ -134,7 +127,6 @@ public struct Builder {
 }
 
 public enum BuilderError: Error {
-	case missingIndexTemplate
 	case missingLayoutTemplate
 	case missingPagesDirectory
 	case missingSiteDirectory
