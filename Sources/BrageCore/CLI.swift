@@ -18,18 +18,16 @@ public struct CLI {
 		case "new":
 			print("TODO")
 		case "build":
-			let builder = try Builder(basedOn: siteDirectory)
-			try builder.build()
+			let builder = Builder()
+            try builder.build(fromSource: siteDirectory)
 		case "serve":
 			print("TODO")
 		default:
 			showHelp()
 		}
 	}
-}
-
-private extension CLI {
-	func showHelp() {
+        
+	private func showHelp() {
 		print("""
 		Brage
 

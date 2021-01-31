@@ -10,6 +10,7 @@ import XCTest
 
 final class BuilderTests: XCTestCase {
 	private var siteDirectory: Folder!
+    private var builder: Builder!
 
 	override func setUp() {
 		super.setUp()
@@ -25,6 +26,8 @@ final class BuilderTests: XCTestCase {
 		try! siteDirectory.createFile(
 			named: "layout.mustache",
 			contents: Data("<title>{{site.title}}</title><body>{{{page.content}}}</body>".utf8))
+        
+        self.builder = Builder()
 	}
 
 	override func tearDown() {
@@ -33,46 +36,40 @@ final class BuilderTests: XCTestCase {
 		super.tearDown()
 	}
 
-	func testInit() throws {
-		_ = try Builder(basedOn: siteDirectory.path)
-	}
-
-	func testInitMissingSiteDirectory() throws {
+	func testBuildMissingSiteDirectory() throws {
 		do {
-			_ = try Builder(basedOn: "\(Folder.temporary)doesnotexist")
+            try builder.build(fromSource: "\(Folder.temporary)doesnotexist")
 		} catch let e as BuilderError {
 			XCTAssertEqual(e, BuilderError.missingSiteDirectory)
 		}
 	}
 
-	func testInitMissingSiteConfig() throws {
+	func testBuildMissingSiteConfig() throws {
 		try! siteDirectory.empty()
-
+        
 		do {
-			_ = try Builder(basedOn: siteDirectory.path)
+            try builder.build(fromSource: siteDirectory.path)
 		} catch let e as BuilderError {
 			XCTAssertEqual(e, BuilderError.missingSiteConfig)
 		}
 	}
 
-	func testInitMissingLayoutTemplate() throws {
+	func testBuildMissingLayoutTemplate() throws {
 		let layoutFile = try! siteDirectory.file(named: "layout.mustache")
 		try! layoutFile.delete()
 
 		do {
-			_ = try Builder(basedOn: siteDirectory.path)
+            try builder.build(fromSource: siteDirectory.path)
 		} catch let e as BuilderError {
 			XCTAssertEqual(e, BuilderError.missingLayoutTemplate)
 		}
 	}
 
-	func testRenderTemplateMustache() throws {
-		let builder = try Builder(basedOn: siteDirectory.path)
-
+	func testRenderMustacheTemplate() throws {
 		let pagesDirectory = try siteDirectory.createSubfolderIfNeeded(withName: "pages")
 		let pageFile = try! pagesDirectory.createFile(
 			named: "testpage.mustache",
-			contents: Data("THIS IS CONTENT".utf8))
+			contents: Data("THIS IS {{site.title}}".utf8))
 		let templateData = TemplateData(
 			site: TemplateSiteData(
 				title: "Test Page",
@@ -87,7 +84,7 @@ final class BuilderTests: XCTestCase {
 			)
 		)
 
-		let result = try builder.renderTemplate(from: pageFile, data: templateData)
-		XCTAssertEqual(result, "<title>Test Page</title><body>THIS IS CONTENT</body>")
+		let result = try builder.renderMustacheTemplate(from: pageFile, data: templateData)
+		XCTAssertEqual(result, "THIS IS Test Page")
 	}
 }

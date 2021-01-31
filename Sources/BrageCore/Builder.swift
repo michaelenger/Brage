@@ -9,39 +9,36 @@ import Foundation
 import Mustache
 
 public struct Builder {
-	private let config: SiteConfig
-	private let siteDirectory: Folder
-	private let layoutTemplate: Template
+    public func build(fromSource sourcePath: String?) throws {
+        let siteDirectory: Folder
+        do {
+            siteDirectory = sourcePath != nil
+                ? try Folder(path: sourcePath!)
+                : Folder.current
+        } catch is FilesError<LocationErrorReason> {
+            throw BuilderError.missingSiteDirectory
+        }
 
-	public init(basedOn path: String?) throws {
-		do {
-			self.siteDirectory = path != nil
-				? try Folder(path: path!)
-				: Folder.current
-		} catch is FilesError<LocationErrorReason> {
-			throw BuilderError.missingSiteDirectory
-		}
+        let config: SiteConfig
+        do {
+            let configText = try siteDirectory.file(at: "site.yml")
+                .readAsString()
 
-		do {
-			let configText = try siteDirectory.file(at: "site.yml")
-				.readAsString()
+            config = try parseConfig(from: configText)
 
-			self.config = try parseConfig(from: configText)
+        } catch is FilesError<LocationErrorReason> {
+            throw BuilderError.missingSiteConfig
+        }
 
-		} catch is FilesError<LocationErrorReason> {
-			throw BuilderError.missingSiteConfig
-		}
+        let layoutTemplate: Template
+        do {
+            let layoutString = try siteDirectory.file(at: "layout.mustache")
+                .readAsString()
+            layoutTemplate = try Template(string: layoutString)
+        } catch is FilesError<LocationErrorReason> {
+            throw BuilderError.missingLayoutTemplate
+        }
 
-		do {
-			let layoutString = try siteDirectory.file(at: "layout.mustache")
-				.readAsString()
-			layoutTemplate = try Template(string: layoutString)
-		} catch is FilesError<LocationErrorReason> {
-			throw BuilderError.missingLayoutTemplate
-		}
-	}
-
-	public func build() throws {
 		// Get the pages directory
 		let pagesDirectory: Folder
 		do {
@@ -92,8 +89,8 @@ public struct Builder {
 
 			let data = TemplateData(
 				site: TemplateSiteData(
-					title: self.config.title,
-					description: self.config.description,
+					title: config.title,
+					description: config.description,
 					root: rootPath,
 					assets: "\(rootPath)assets/"
 				),
@@ -106,7 +103,16 @@ public struct Builder {
 
 			// Render template
 			let targetFile = try targetDirectory.createFile(at: "index.html")
-			let content = try renderTemplate(from: file, data: data)
+            let pageContent = try renderMustacheTemplate(from: file, data: data)
+            
+            let content = try layoutTemplate.render([
+                "site": data.site.dictionary,
+                "page": [
+                    "title": data.page.title,
+                    "path": uri,
+                    "content": pageContent
+                ],
+            ])
 
 			try targetFile.write(content)
 		}
@@ -116,21 +122,13 @@ public struct Builder {
 		}
 	}
 
-	public func renderTemplate(from file: File, data: TemplateData) throws -> String {
+	public func renderMustacheTemplate(from file: File, data: TemplateData) throws -> String {
 		let fileContents = try file.readAsString()
 		let template = try Template(string: fileContents)
 
-		let content = try template.render([
+		return try template.render([
 			"site": data.site.dictionary,
 			"page": data.page.dictionary,
-		])
-
-		var pageData = data.page
-		pageData.content = content
-
-		return try layoutTemplate.render([
-			"site": data.site.dictionary,
-			"page": pageData.dictionary,
 		])
 	}
 }
@@ -153,7 +151,7 @@ public struct TemplateSiteData: Codable {
 public struct TemplatePageData: Codable {
 	public let title: String
 	public let path: String
-	public var content: String?
+	public let content: String?
 }
 
 public struct TemplateData: Codable {
