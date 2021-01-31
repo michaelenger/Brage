@@ -4,7 +4,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "Heimdall",
+    name: "Brage",
     dependencies: [
         // Dependencies declare other packages that this package depends on.
         .package(url: "https://github.com/johnsundell/files.git", from: "4.0.0"),
@@ -15,13 +15,13 @@ let package = Package(
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
-            name: "HeimdallCore",
+            name: "BrageCore",
             dependencies: ["Files", "Mustache", "Yaml"]),
         .target(
-            name: "Heimdall",
-            dependencies: ["HeimdallCore"]),
+            name: "Brage",
+            dependencies: ["BrageCore"]),
         .testTarget(
-            name: "HeimdallTests",
-            dependencies: ["HeimdallCore"]),
+            name: "BrageTests",
+            dependencies: ["BrageCore"]),
     ]
 )

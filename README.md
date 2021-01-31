@@ -1,4 +1,6 @@
-# Heimdall
+# Brage
+
+_Brage er i den norrøne mytologien guden for diktning og skaldekunst._ [WikiPedia](https://no.wikipedia.org/wiki/Brage)
 
 Site builder for generating sites based on YAML, Markdown, and [Mustache](https://mustache.github.io/) templates.
 
@@ -9,7 +11,7 @@ Site builder for generating sites based on YAML, Markdown, and [Mustache](https:
 Run the CLI tool along with any of the commands along with an optional site directory. If no directory is present it will use the current directory.
 
 ```shell
-heimdall [command] [DIRECTORY]
+brage [command] [DIRECTORY]
 ```
 
 The resulting HTML will be placed in a `build` directory.

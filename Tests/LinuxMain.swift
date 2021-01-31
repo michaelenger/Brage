@@ -1,7 +1,7 @@
 import XCTest
 
-import HeimdallTests
+import BrageTests
 
 var tests = [XCTestCaseEntry]()
-tests += HeimdallTests.allTests()
+tests += BrageTests.allTests()
 XCTMain(tests)

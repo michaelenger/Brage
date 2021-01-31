@@ -1,12 +1,12 @@
 /**
- *  Heimdall
+ *  Brage
  *  Copyright (c) Michael Enger 2021
  *  MIT license, see LICENSE file for details
  */
 
 import Files
 import XCTest
-@testable import HeimdallCore
+@testable import BrageCore
 
 final class BuilderTests: XCTestCase {
 	private var siteDirectory: Folder!

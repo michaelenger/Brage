@@ -1,5 +1,5 @@
 /**
- *  Heimdall
+ *  Brage
  *  Copyright (c) Michael Enger 2021
  *  MIT license, see LICENSE file for details
  */
@@ -31,9 +31,9 @@ public struct CLI {
 private extension CLI {
 	func showHelp() {
 		print("""
-		Heimdall
+		Brage
 
-		USAGE: heimdall [command]
+		USAGE: Brage [command]
 
 		Available commands:
 		- new: Set up a new site with some example data.
