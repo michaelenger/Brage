@@ -115,7 +115,7 @@ public struct Builder {
 		}
 	}
 
-	public func renderMustacheTemplate(from file: File, data: TemplateData) throws -> String {
+	private func renderMustacheTemplate(from file: File, data: TemplateData) throws -> String {
 		let fileContents = try file.readAsString()
 		let template = try Template(string: fileContents)
 

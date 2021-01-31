@@ -22,7 +22,7 @@ final class BuilderTests: XCTestCase {
 		// Fill it with some example data
 		try! siteDirectory.createFile(
 			named: "site.yml",
-			contents: Data("---\ntitle: Test Page\n".utf8))
+			contents: Data("---\ntitle: Test Site\n".utf8))
 		try! siteDirectory.createFile(
 			named: "layout.mustache",
 			contents: Data("<title>{{site.title}}</title><body>{{{page.content}}}</body>".utf8))
@@ -67,24 +67,15 @@ final class BuilderTests: XCTestCase {
 
 	func testRenderMustacheTemplate() throws {
 		let pagesDirectory = try siteDirectory.createSubfolderIfNeeded(withName: "pages")
-		let pageFile = try! pagesDirectory.createFile(
+		try! pagesDirectory.createFile(
 			named: "testpage.mustache",
-			contents: Data("THIS IS {{site.title}}".utf8))
-		let templateData = TemplateData(
-			site: TemplateSiteData(
-				title: "Test Page",
-				description: nil,
-				root: "./",
-				assets: "./assets/"
-			),
-			page: TemplatePageData(
-				title: "Index",
-				path: "./",
-				content: nil
-			)
-		)
+			contents: Data("THIS IS {{page.title}}".utf8))
 
-		let result = try builder.renderMustacheTemplate(from: pageFile, data: templateData)
-		XCTAssertEqual(result, "THIS IS Test Page")
+        try builder.build(fromSource: siteDirectory.path)
+        
+        let result = try siteDirectory.file(at: "build/testpage/index.html").readAsString()
+        let expected = "<title>Test Site</title><body>THIS IS Testpage</body>"
+        
+        XCTAssertEqual(result, expected)
 	}
 }
