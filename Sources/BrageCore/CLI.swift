@@ -31,7 +31,7 @@ public struct CLI {
 		print("""
 		Brage
 
-		USAGE: Brage [command]
+		USAGE: Brage [command] [site_directory]
 
 		Available commands:
 		- new: Set up a new site with some example data.

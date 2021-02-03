@@ -24,28 +24,19 @@ The resulting HTML will be placed in a `build` directory.
 
 ## Site Generation
 
-The site generation is based on YAML files and Mustache templates. The only requirements to start with is a config file, a layout template, and one or more pages.
+The site generation is based on Mustache and Markdown templates. The only requirements to start with is a config file, a layout template, and one or more pages.
 
 ### Config File
 
-The config is defined in a `site.yml` file in the site directory. It defines some basic meta data as well as other contents (explained below).
+The config is defined in a `site.yaml` file in the site directory. It defines some basic meta data as well as other contents (explained below).
 
 * `title` Title of the site.
-* `description` Description of the site, used in meta tags.
+* `description` Description of the site.
+* `image` Social media preview image relative to the assets directory.
 
-### Layout Template
+### Layout Template
 
-The layout template is defined in a `layout.mustache` file at the root of the site directory and is used when generating all the pages. It will be rendered with the following available variables:
-
-* `site` Site meta data
-  * `title` Title of the site.
-  * `description` Description of the site, used in meta tags.
-  * `root` Relative path to the root directory.
-  * `assets` Relative path to the assets directory.
-* `page` Page meta data
-  * `title` Title of the page
-  * `content` Content of the page
-  * `path` URI path to the page
+The layout template is defined in a `layout.mustache` (or `layout.html`) file at the root of the site directory and is used when generating all the pages. The page templates are rendered and placed inside the layout template where their content is available in the `page.content` variable. 
 
 ### Pages
 
@@ -55,7 +46,7 @@ There is only one special file, the `index` file, which defines the index page. 
 
 For example the file `pages/example/hello.mustache` would become the file `build/example/hello/index.html` and have the URI `/example/hello`.
 
-#### Types
+#### File Types
 
 The following file extensions are recognised and handled appropriately:
 
@@ -69,10 +60,25 @@ The following file extensions are recognised and handled appropriately:
 * `markdown`
 * `md`
 
-##### Yaml Config
+##### Site Config
 
 * `yaml`
 * `yml`
+
+### Rendering Templates
+
+All Mustache template (including the layout template) are renderered with the following variables available:
+
+* `site` Site meta data.
+    * `title` Title of the site (from the site config).
+    * `description` Description of the site (from the site config).
+    * `image` Social media preview image (from the site config).
+    * `root` Relative path to the root directory.
+    * `assets` Relative path to the assets directory.
+* `page` Page meta data.
+    * `title` Title of the page.
+    * `content` Content of the page (only available in the layout template).
+    * `path` URI path to the page.
 
 ### Assets
 

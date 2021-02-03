@@ -75,6 +75,7 @@ public struct Builder {
 				site: TemplateSiteData(
 					title: config.title,
 					description: config.description,
+                    image: config.image != nil ? "\(rootPath)assets/\(config.image!)" : nil,
 					root: rootPath,
 					assets: "\(rootPath)assets/"
 				),
@@ -183,6 +184,7 @@ public enum BuilderError: Error, Equatable {
 public struct TemplateSiteData: Codable {
 	public let title: String
 	public let description: String?
+    public let image: String?
 	public let root: String
 	public let assets: String
 }
