@@ -93,7 +93,7 @@ public struct Builder {
             switch file.extension?.lowercased() {
             case "markdown", "md":
                 pageContent = try renderMarkdownTemplate(from: file)
-            case "stencil", "html":
+            case "html":
                 pageContent = try renderStencilTemplate(from: file, data: data)
             default:
                 throw BuilderError.unrecognizedTemplate(file.name)
@@ -135,9 +135,7 @@ public struct Builder {
     /// - Returns: A stencil template.
     private func loadLayoutTemplate(from directory: Folder) throws -> Template {
         let layoutString: String
-        if directory.containsFile(named: "layout.stencil") {
-            layoutString = try directory.file(at: "layout.stencil").readAsString()
-        } else if directory.containsFile(named: "layout.html") {
+        if directory.containsFile(named: "layout.html") {
             layoutString = try directory.file(at: "layout.html").readAsString()
         } else {
             throw BuilderError.missingLayoutTemplate
