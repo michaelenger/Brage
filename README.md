@@ -61,9 +61,13 @@ All Stencil template (including the layout template) are renderered with the fol
     * `content` Content of the page (only available in the layout template).
     * `path` URI path to the page.
 
+#### Including/extending Templates
+
+It's possible to extend/include templates (as per the [Stencil documentation](https://stencil.fuller.li/en/latest/templates.html#template-inheritance)) with files found in the `templates` directory (within the main site directory).
+
 ### Assets
 
-Any files in a directory called `assets` will be copied as-is to the build directory.
+Any files in a directory called `assets` will be copied as-is to an `assets` directory in the build directory.
 
 ### Collections
 

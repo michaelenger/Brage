@@ -65,6 +65,25 @@ final class BuilderTests: XCTestCase {
 		}
 	}
     
+    func testRenderImportedTemplate() throws {
+        let pagesDirectory = try siteDirectory.createSubfolderIfNeeded(withName: "pages")
+        try! pagesDirectory.createFile(
+            named: "index.html",
+            contents: Data("So Above {% include \"other.html\" %} So Below".utf8))
+    
+        let templateDirectory = try siteDirectory.createSubfolderIfNeeded(withName: "templates")
+        try! templateDirectory.createFile(
+            named: "other.html",
+            contents: Data("--".utf8))
+
+        try builder.build(fromSource: siteDirectory.path)
+        
+        let result = try siteDirectory.file(at: "build/index.html").readAsString()
+        let expected = "<title>Test Site</title><body>So Above -- So Below</body>"
+        
+        XCTAssertEqual(result, expected)
+    }
+    
     func testRenderMarkdownTemplate() throws {
         let pagesDirectory = try siteDirectory.createSubfolderIfNeeded(withName: "pages")
         try! pagesDirectory.createFile(

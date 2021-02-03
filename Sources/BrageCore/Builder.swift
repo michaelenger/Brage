@@ -7,6 +7,7 @@
 import Files
 import Foundation
 import Ink
+import PathKit
 import Stencil
 
 public struct Builder {
@@ -23,8 +24,14 @@ public struct Builder {
             throw BuilderError.missingSiteDirectory
         }
 
+        // Load config and layout
         let config = try loadConfig(from: siteDirectory)
-        let layoutTemplate = try loadLayoutTemplate(from: siteDirectory)
+        let layoutTemplate: String
+        do {
+            layoutTemplate = try siteDirectory.file(at: "layout.html").readAsString()
+        } catch is FilesError<LocationErrorReason> {
+            throw BuilderError.missingLayoutTemplate
+        }
 
 		// Get the pages directory
 		let pagesDirectory: Folder
@@ -51,6 +58,17 @@ public struct Builder {
 			// no assets to copy just create the directory
 			_ = try buildDirectory.createSubfolder(at: "assets")
 		}
+        
+        // Construct render environment
+        let environment: Environment
+        do {
+            let templatePath = try siteDirectory.subfolder(named:"templates").path
+            let fileSystemLoader = FileSystemLoader(paths: [Path(templatePath)])
+            environment = Environment(loader: fileSystemLoader)
+        } catch is FilesError<LocationErrorReason> {
+            // No templates for you
+            environment = Environment()
+        }
 
 		// Render templates
 		let files = pagesDirectory.files.recursive
@@ -94,12 +112,12 @@ public struct Builder {
             case "markdown", "md":
                 pageContent = try renderMarkdownTemplate(from: file)
             case "html":
-                pageContent = try renderStencilTemplate(from: file, data: data)
+                pageContent = try renderStencilTemplate(environment: environment, from: file, data: data)
             default:
                 throw BuilderError.unrecognizedTemplate(file.name)
             }
             
-            let content = try layoutTemplate.render([
+            let content = try environment.renderTemplate(string: layoutTemplate, context: [
                 "site": data.site.dictionary as Any,
                 "page": [
                     "title": data.page.title,
@@ -129,21 +147,6 @@ public struct Builder {
         return try parseConfig(from: configString)
     }
     
-    /// Load the layout Stencil template from the specified site directory.
-    ///
-    /// - Parameter from: Site directory to load the template from.
-    /// - Returns: A stencil template.
-    private func loadLayoutTemplate(from directory: Folder) throws -> Template {
-        let layoutString: String
-        if directory.containsFile(named: "layout.html") {
-            layoutString = try directory.file(at: "layout.html").readAsString()
-        } else {
-            throw BuilderError.missingLayoutTemplate
-        }
-        
-        return Template(templateString: layoutString)
-    }
-    
     /// Render a markdown template from a specified file.
     ///
     /// - Parameter from: File to read and render markdown from.
@@ -157,14 +160,14 @@ public struct Builder {
 
     /// Render a Stencil template from a specified file.
     ///
+    /// - Parameter environment: Render environment to use.
     /// - Parameter file: File to read and render from.
     /// - Parameter data: Data to send to the template.
     /// - Returns: Rendered HTML content.
-	private func renderStencilTemplate(from file: File, data: TemplateData) throws -> String {
+    private func renderStencilTemplate(environment: Environment, from file: File, data: TemplateData) throws -> String {
 		let fileContents = try file.readAsString()
-		let template = Template(templateString: fileContents)
-
-		return try template.render([
+        
+        return try environment.renderTemplate(string: fileContents, context: [
 			"site": data.site.dictionary as Any,
 			"page": data.page.dictionary as Any,
 		])
