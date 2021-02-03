@@ -64,6 +64,20 @@ final class BuilderTests: XCTestCase {
 			XCTAssertEqual(e, BuilderError.missingLayoutTemplate)
 		}
 	}
+    
+    func testRenderMarkdownTemplate() throws {
+        let pagesDirectory = try siteDirectory.createSubfolderIfNeeded(withName: "pages")
+        try! pagesDirectory.createFile(
+            named: "testpage.markdown",
+            contents: Data("THIS IS **TEST**".utf8))
+
+        try builder.build(fromSource: siteDirectory.path)
+        
+        let result = try siteDirectory.file(at: "build/testpage/index.html").readAsString()
+        let expected = "<title>Test Site</title><body><p>THIS IS <strong>TEST</strong></p></body>"
+        
+        XCTAssertEqual(result, expected)
+    }
 
 	func testRenderMustacheTemplate() throws {
 		let pagesDirectory = try siteDirectory.createSubfolderIfNeeded(withName: "pages")

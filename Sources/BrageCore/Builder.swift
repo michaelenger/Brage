@@ -6,6 +6,7 @@
 
 import Files
 import Foundation
+import Ink
 import Mustache
 
 public struct Builder {
@@ -96,9 +97,10 @@ public struct Builder {
             let pageContent: String
             
             switch file.extension?.lowercased() {
+            case "markdown", "md":
+                pageContent = try renderMarkdownTemplate(from: file)
             case "mustache", "html":
                 pageContent = try renderMustacheTemplate(from: file, data: data)
-                break
             default:
                 throw BuilderError.unrecognizedTemplate(file.name)
             }
@@ -132,7 +134,23 @@ public struct Builder {
         
         return try Template(string: layoutString)
     }
+    
+    /// Render a markdown template from a specified file.
+    ///
+    /// - Parameter file: File to read and render markdown from.
+    /// - Returns: Rendered HTML content.
+    private func renderMarkdownTemplate(from file: File) throws -> String {
+        let fileContents = try file.readAsString()
+        let parser = MarkdownParser()
+        
+        return parser.html(from: fileContents)
+    }
 
+    /// Render a mustache template from a specified file.
+    ///
+    /// - Parameter file: File to read and render mustache from.
+    /// - Parameter data: Data to send to the template.
+    /// - Returns: Rendered HTML content.
 	private func renderMustacheTemplate(from file: File, data: TemplateData) throws -> String {
 		let fileContents = try file.readAsString()
 		let template = try Template(string: fileContents)

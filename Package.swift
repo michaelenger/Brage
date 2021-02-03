@@ -9,6 +9,7 @@ let package = Package(
         // Dependencies declare other packages that this package depends on.
         .package(url: "https://github.com/johnsundell/files.git", from: "4.0.0"),
         .package(url: "https://github.com/groue/GRMustache.swift", from: "4.0.0"),
+        .package(url: "https://github.com/JohnSundell/Ink.git", from: "0.5.0"),
         .package(url: "https://github.com/behrang/YamlSwift.git", from: "3.4.4"),
     ],
     targets: [
@@ -16,7 +17,7 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
             name: "BrageCore",
-            dependencies: ["Files", "Mustache", "Yaml"]),
+            dependencies: ["Files", "Ink", "Mustache", "Yaml"]),
         .target(
             name: "Brage",
             dependencies: ["BrageCore"]),
