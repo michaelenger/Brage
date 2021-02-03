@@ -100,7 +100,15 @@ public struct Builder {
 
 			// Render template
 			let targetFile = try targetDirectory.createFile(at: "index.html")
-            let pageContent = try renderMustacheTemplate(from: file, data: data)
+            let pageContent: String
+            
+            switch file.extension?.lowercased() {
+            case "mustache":
+                pageContent = try renderMustacheTemplate(from: file, data: data)
+                break
+            default:
+                throw BuilderError.unrecognizedTemplate(file.name)
+            }
             
             let content = try layoutTemplate.render([
                 "site": data.site.dictionary,
@@ -126,11 +134,12 @@ public struct Builder {
 	}
 }
 
-public enum BuilderError: Error {
+public enum BuilderError: Error, Equatable {
 	case missingLayoutTemplate
 	case missingPagesDirectory
 	case missingSiteDirectory
 	case missingSiteConfig
+    case unrecognizedTemplate(String)
 }
 
 public struct TemplateSiteData: Codable {

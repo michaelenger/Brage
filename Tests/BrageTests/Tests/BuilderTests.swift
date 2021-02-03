@@ -78,4 +78,17 @@ final class BuilderTests: XCTestCase {
         
         XCTAssertEqual(result, expected)
 	}
+    
+    func testRenderUnknownTemplate() throws {
+        let pagesDirectory = try siteDirectory.createSubfolderIfNeeded(withName: "pages")
+        try! pagesDirectory.createFile(
+            named: "testpage.lol",
+            contents: Data("THIS IS {{page.title}}".utf8))
+
+        do {
+            try builder.build(fromSource: siteDirectory.path)
+        } catch let e as BuilderError {
+            XCTAssertEqual(e, BuilderError.unrecognizedTemplate("testpage.lol"))
+        }
+    }
 }
