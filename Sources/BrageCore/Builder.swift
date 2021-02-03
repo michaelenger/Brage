@@ -144,7 +144,7 @@ public struct Builder {
             throw BuilderError.missingSiteConfig
         }
         
-        return try parseConfig(from: configString)
+        return try SiteConfig.parse(from: configString)
     }
     
     /// Render a markdown template from a specified file.
