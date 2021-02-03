@@ -24,8 +24,8 @@ final class BuilderTests: XCTestCase {
 			named: "site.yml",
 			contents: Data("---\ntitle: Test Site\n".utf8))
 		try! siteDirectory.createFile(
-			named: "layout.mustache",
-			contents: Data("<title>{{site.title}}</title><body>{{{page.content}}}</body>".utf8))
+			named: "layout.stencil",
+			contents: Data("<title>{{site.title}}</title><body>{{page.content}}</body>".utf8))
         
         self.builder = Builder()
 	}
@@ -55,7 +55,7 @@ final class BuilderTests: XCTestCase {
 	}
 
 	func testBuildMissingLayoutTemplate() throws {
-		let layoutFile = try! siteDirectory.file(named: "layout.mustache")
+		let layoutFile = try! siteDirectory.file(named: "layout.stencil")
 		try! layoutFile.delete()
 
 		do {
@@ -79,10 +79,10 @@ final class BuilderTests: XCTestCase {
         XCTAssertEqual(result, expected)
     }
 
-	func testRenderMustacheTemplate() throws {
+	func testRenderStencilTemplate() throws {
 		let pagesDirectory = try siteDirectory.createSubfolderIfNeeded(withName: "pages")
 		try! pagesDirectory.createFile(
-			named: "testpage.mustache",
+			named: "testpage.stencil",
 			contents: Data("THIS IS {{page.title}}".utf8))
 
         try builder.build(fromSource: siteDirectory.path)
@@ -93,8 +93,8 @@ final class BuilderTests: XCTestCase {
         XCTAssertEqual(result, expected)
 	}
     
-    func testRenderHTMLMustacheTemplate() throws {
-        let layoutFile = try! siteDirectory.file(named: "layout.mustache")
+    func testRenderHTMLTemplate() throws {
+        let layoutFile = try! siteDirectory.file(named: "layout.stencil")
         try! layoutFile.rename(to: "layout.html", keepExtension: false)
         
         let pagesDirectory = try siteDirectory.createSubfolderIfNeeded(withName: "pages")

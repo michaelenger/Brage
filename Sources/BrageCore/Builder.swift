@@ -7,7 +7,7 @@
 import Files
 import Foundation
 import Ink
-import Mustache
+import Stencil
 
 public struct Builder {
     /// Build a site based on a site directory.
@@ -93,14 +93,14 @@ public struct Builder {
             switch file.extension?.lowercased() {
             case "markdown", "md":
                 pageContent = try renderMarkdownTemplate(from: file)
-            case "mustache", "html":
-                pageContent = try renderMustacheTemplate(from: file, data: data)
+            case "stencil", "html":
+                pageContent = try renderStencilTemplate(from: file, data: data)
             default:
                 throw BuilderError.unrecognizedTemplate(file.name)
             }
             
             let content = try layoutTemplate.render([
-                "site": data.site.dictionary,
+                "site": data.site.dictionary as Any,
                 "page": [
                     "title": data.page.title,
                     "path": uri,
@@ -129,21 +129,21 @@ public struct Builder {
         return try parseConfig(from: configString)
     }
     
-    /// Load the layout Mustache template from the specified site directory.
+    /// Load the layout Stencil template from the specified site directory.
     ///
     /// - Parameter from: Site directory to load the template from.
-    /// - Returns: A mustache template.
+    /// - Returns: A stencil template.
     private func loadLayoutTemplate(from directory: Folder) throws -> Template {
         let layoutString: String
-        if directory.containsFile(named: "layout.mustache") {
-            layoutString = try directory.file(at: "layout.mustache").readAsString()
+        if directory.containsFile(named: "layout.stencil") {
+            layoutString = try directory.file(at: "layout.stencil").readAsString()
         } else if directory.containsFile(named: "layout.html") {
             layoutString = try directory.file(at: "layout.html").readAsString()
         } else {
             throw BuilderError.missingLayoutTemplate
         }
         
-        return try Template(string: layoutString)
+        return Template(templateString: layoutString)
     }
     
     /// Render a markdown template from a specified file.
@@ -157,18 +157,18 @@ public struct Builder {
         return parser.html(from: fileContents)
     }
 
-    /// Render a mustache template from a specified file.
+    /// Render a Stencil template from a specified file.
     ///
-    /// - Parameter file: File to read and render mustache from.
+    /// - Parameter file: File to read and render from.
     /// - Parameter data: Data to send to the template.
     /// - Returns: Rendered HTML content.
-	private func renderMustacheTemplate(from file: File, data: TemplateData) throws -> String {
+	private func renderStencilTemplate(from file: File, data: TemplateData) throws -> String {
 		let fileContents = try file.readAsString()
-		let template = try Template(string: fileContents)
+		let template = Template(templateString: fileContents)
 
 		return try template.render([
-			"site": data.site.dictionary,
-			"page": data.page.dictionary,
+			"site": data.site.dictionary as Any,
+			"page": data.page.dictionary as Any,
 		])
 	}
 }

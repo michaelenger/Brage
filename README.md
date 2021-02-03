@@ -2,7 +2,7 @@
 
 _Brage er i den norrøne mytologien guden for diktning og skaldekunst._ [WikiPedia](https://no.wikipedia.org/wiki/Brage)
 
-Site builder for generating sites based on YAML, Markdown, and [Mustache](https://mustache.github.io/) templates.
+Site builder for generating sites based on [Stencil](https://github.com/stencilproject/Stencil) and [Markdown](https://www.markdownguide.org/) templates.
 
 **NOTE** This application is currently under development and a lot of this readme is reflecting ambitious plans rather than reality.
 
@@ -24,7 +24,7 @@ The resulting HTML will be placed in a `build` directory.
 
 ## Site Generation
 
-The site generation is based on Mustache and Markdown templates. The only requirements to start with is a config file, a layout template, and one or more pages.
+The site generation is based on Stencil and Markdown templates. The only requirements to start with is a config file, a layout template, and one or more pages.
 
 ### Config File
 
@@ -36,38 +36,19 @@ The config is defined in a `site.yaml` file in the site directory. It defines so
 
 ### Layout Template
 
-The layout template is defined in a `layout.mustache` (or `layout.html`) file at the root of the site directory and is used when generating all the pages. The page templates are rendered and placed inside the layout template where their content is available in the `page.content` variable. 
+The layout template is defined in a `layout.html` file at the root of the site directory and is used when generating all the pages. The page templates are rendered and placed inside the layout template where their content is available in the `page.content` variable. 
 
 ### Pages
 
-Pages are defined in files contained in the `pages` directory. They can be either Mustache templates, Markdown files, or YAML files defining content blocks to use.
+Pages are defined in files contained in the `pages` directory. They can be either Stencil templates or Markdown files.
 
 There is only one special file, the `index` file, which defines the index page. It will be generated with a resulting URI of `/`. Any other files in the directory will be turned into pages in subfolders so that the path to the generated HTML file is correct based on the template file's location.
 
-For example the file `pages/example/hello.mustache` would become the file `build/example/hello/index.html` and have the URI `/example/hello`.
-
-#### File Types
-
-The following file extensions are recognised and handled appropriately:
-
-##### Mustache Templates
-
-* `mustache`
-* `html`
-
-##### Markdown Templates
-
-* `markdown`
-* `md`
-
-##### Site Config
-
-* `yaml`
-* `yml`
+For example the file `pages/example/hello.html` would become the file `build/example/hello/index.html` and have the URI `/example/hello`.
 
 ### Rendering Templates
 
-All Mustache template (including the layout template) are renderered with the following variables available:
+All Stencil template (including the layout template) are renderered with the following variables available:
 
 * `site` Site meta data.
     * `title` Title of the site (from the site config).
@@ -92,8 +73,8 @@ TODO
 
 TODO
 
-## Development
+## Development
 
-### Requirements
+### Requirements
 
 * [Swift 5](https://swift.org/)
