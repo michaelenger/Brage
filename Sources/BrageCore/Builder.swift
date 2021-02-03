@@ -10,6 +10,9 @@ import Ink
 import Mustache
 
 public struct Builder {
+    /// Build a site based on a site directory.
+    ///
+    /// - Parameter fromSource: Path to the directory of the site to build.
     public func build(fromSource sourcePath: String?) throws {
         let siteDirectory: Folder
         do {
@@ -20,17 +23,7 @@ public struct Builder {
             throw BuilderError.missingSiteDirectory
         }
 
-        let config: SiteConfig
-        do {
-            let configText = try siteDirectory.file(at: "site.yml")
-                .readAsString()
-
-            config = try parseConfig(from: configText)
-
-        } catch is FilesError<LocationErrorReason> {
-            throw BuilderError.missingSiteConfig
-        }
-
+        let config = try loadConfig(from: siteDirectory)
         let layoutTemplate = try loadLayoutTemplate(from: siteDirectory)
 
 		// Get the pages directory
@@ -118,9 +111,26 @@ public struct Builder {
 		}
 	}
     
+    /// Load the site config from the specified site directory.
+    ///
+    /// - Parameter from: Site directory to load the config from.
+    /// - Returns: The site config.
+    private func loadConfig(from directory: Folder) throws -> SiteConfig {
+        let configString: String
+        if directory.containsFile(named: "site.yaml") {
+            configString = try directory.file(at: "site.yaml").readAsString()
+        } else if directory.containsFile(named: "site.yml") {
+            configString = try directory.file(at: "site.yml").readAsString()
+        } else {
+            throw BuilderError.missingSiteConfig
+        }
+        
+        return try parseConfig(from: configString)
+    }
+    
     /// Load the layout Mustache template from the specified site directory.
     ///
-    /// - Parameter directory: Site directory to load the template from.
+    /// - Parameter from: Site directory to load the template from.
     /// - Returns: A mustache template.
     private func loadLayoutTemplate(from directory: Folder) throws -> Template {
         let layoutString: String
@@ -137,7 +147,7 @@ public struct Builder {
     
     /// Render a markdown template from a specified file.
     ///
-    /// - Parameter file: File to read and render markdown from.
+    /// - Parameter from: File to read and render markdown from.
     /// - Returns: Rendered HTML content.
     private func renderMarkdownTemplate(from file: File) throws -> String {
         let fileContents = try file.readAsString()
