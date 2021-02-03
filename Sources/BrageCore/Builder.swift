@@ -30,14 +30,7 @@ public struct Builder {
             throw BuilderError.missingSiteConfig
         }
 
-        let layoutTemplate: Template
-        do {
-            let layoutString = try siteDirectory.file(at: "layout.mustache")
-                .readAsString()
-            layoutTemplate = try Template(string: layoutString)
-        } catch is FilesError<LocationErrorReason> {
-            throw BuilderError.missingLayoutTemplate
-        }
+        let layoutTemplate = try loadLayoutTemplate(from: siteDirectory)
 
 		// Get the pages directory
 		let pagesDirectory: Folder
@@ -103,7 +96,7 @@ public struct Builder {
             let pageContent: String
             
             switch file.extension?.lowercased() {
-            case "mustache":
+            case "mustache", "html":
                 pageContent = try renderMustacheTemplate(from: file, data: data)
                 break
             default:
@@ -122,6 +115,23 @@ public struct Builder {
 			try targetFile.write(content)
 		}
 	}
+    
+    /// Load the layout Mustache template from the specified site directory.
+    ///
+    /// - Parameter directory: Site directory to load the template from.
+    /// - Returns: A mustache template.
+    private func loadLayoutTemplate(from directory: Folder) throws -> Template {
+        let layoutString: String
+        if directory.containsFile(named: "layout.mustache") {
+            layoutString = try directory.file(at: "layout.mustache").readAsString()
+        } else if directory.containsFile(named: "layout.html") {
+            layoutString = try directory.file(at: "layout.html").readAsString()
+        } else {
+            throw BuilderError.missingLayoutTemplate
+        }
+        
+        return try Template(string: layoutString)
+    }
 
 	private func renderMustacheTemplate(from file: File, data: TemplateData) throws -> String {
 		let fileContents = try file.readAsString()

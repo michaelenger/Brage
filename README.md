@@ -55,6 +55,25 @@ There is only one special file, the `index` file, which defines the index page. 
 
 For example the file `pages/example/hello.mustache` would become the file `build/example/hello/index.html` and have the URI `/example/hello`.
 
+#### Types
+
+The following file extensions are recognised and handled appropriately:
+
+##### Mustache Templates
+
+* `mustache`
+* `html`
+
+##### Markdown Templates
+
+* `markdown`
+* `md`
+
+##### Yaml Config
+
+* `yaml`
+* `yml`
+
 ### Assets
 
 Any files in a directory called `assets` will be copied as-is to the build directory.

@@ -79,6 +79,23 @@ final class BuilderTests: XCTestCase {
         XCTAssertEqual(result, expected)
 	}
     
+    func testRenderHTMLMustacheTemplate() throws {
+        let layoutFile = try! siteDirectory.file(named: "layout.mustache")
+        try! layoutFile.rename(to: "layout.html", keepExtension: false)
+        
+        let pagesDirectory = try siteDirectory.createSubfolderIfNeeded(withName: "pages")
+        try! pagesDirectory.createFile(
+            named: "testpage.html",
+            contents: Data("THIS IS {{page.title}}".utf8))
+
+        try builder.build(fromSource: siteDirectory.path)
+        
+        let result = try siteDirectory.file(at: "build/testpage/index.html").readAsString()
+        let expected = "<title>Test Site</title><body>THIS IS Testpage</body>"
+        
+        XCTAssertEqual(result, expected)
+    }
+    
     func testRenderUnknownTemplate() throws {
         let pagesDirectory = try siteDirectory.createSubfolderIfNeeded(withName: "pages")
         try! pagesDirectory.createFile(
