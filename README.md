@@ -11,10 +11,10 @@ Site builder for generating sites based on [Stencil](https://github.com/stencilp
 Run the CLI tool along with any of the commands along with an optional site directory. If no directory is present it will use the current directory.
 
 ```shell
-brage [command] [DIRECTORY]
+brage [command] [SITE_DIRECTORY] [TARGET_DIRECTORY]
 ```
 
-The resulting HTML will be placed in a `build` directory.
+It's also possible to specify the target directory which if unspecified will be `<SITE_DIRECTORY>/build`. Be aware that all files in the target directory will be overwritten without warning.
 
 ### Commands
 
@@ -93,15 +93,7 @@ It's possible to extend/include templates (as per the [Stencil documentation](ht
 
 ### Assets
 
-Any files in a directory called `assets` will be copied as-is to an `assets` directory in the build directory.
-
-### Collections
-
-TODO
-
-### Forms
-
-TODO
+Any files in a directory called `assets` will be copied as-is to an `assets` directory in the build directory. Linking to them from the websites is a matter of using the `site.assets` variable (or alternatively using an absolute path: `/assets/<your_asset>`).
 
 ## Development
 
