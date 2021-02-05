@@ -24,7 +24,12 @@ final class BuilderTests: XCTestCase {
 		// Fill it with some example data
 		try! sourceDirectory.createFile(
 			named: "site.yml",
-			contents: Data("---\ntitle: Test Site\n".utf8))
+			contents: Data("""
+            ---
+            title: Test Site
+            description: This is just a test.
+            image: lol.png
+            """.utf8))
 		try! sourceDirectory.createFile(
             named: "layout.html",
 			contents: Data("<title>{{site.title}}</title><body>{{page.content}}</body>".utf8))
@@ -117,5 +122,35 @@ final class BuilderTests: XCTestCase {
         } catch let e as BuilderError {
             XCTAssertEqual(e, BuilderError.unrecognizedTemplate("testpage.lol"))
         }
+    }
+    
+    func testStencilVariables() throws {
+        let pagesDirectory = try sourceDirectory.createSubfolderIfNeeded(withName: "pages")
+        try! pagesDirectory.createFile(
+            named: "variables.html",
+            contents: Data("""
+            {{site.title}}
+            {{site.description}}
+            {{site.image}}
+            {{site.root}}
+            {{site.assets}}
+            {{page.title}}
+            {{page.path}}
+            """.utf8))
+
+        try builder.build(source: sourceDirectory, target: targetDirectory)
+        
+        let result = try sourceDirectory.file(at: "build/variables/index.html").readAsString()
+        let expected = """
+        <title>Test Site</title><body>Test Site
+        This is just a test.
+        ../assets/lol.png
+        ../
+        ../assets/
+        Variables
+        /variables</body>
+        """
+
+        XCTAssertEqual(result, expected)
     }
 }
