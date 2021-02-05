@@ -36,19 +36,11 @@ final class BuilderTests: XCTestCase {
 		super.tearDown()
 	}
 
-	func testBuildMissingSiteDirectory() throws {
-		do {
-            try builder.build(fromSource: "\(Folder.temporary)doesnotexist")
-		} catch let e as BuilderError {
-			XCTAssertEqual(e, BuilderError.missingSiteDirectory)
-		}
-	}
-
 	func testBuildMissingSiteConfig() throws {
 		try! siteDirectory.empty()
         
 		do {
-            try builder.build(fromSource: siteDirectory.path)
+            try builder.build(source: siteDirectory)
 		} catch let e as BuilderError {
 			XCTAssertEqual(e, BuilderError.missingSiteConfig)
 		}
@@ -59,7 +51,7 @@ final class BuilderTests: XCTestCase {
 		try! layoutFile.delete()
 
 		do {
-            try builder.build(fromSource: siteDirectory.path)
+            try builder.build(source: siteDirectory)
 		} catch let e as BuilderError {
 			XCTAssertEqual(e, BuilderError.missingLayoutTemplate)
 		}
@@ -76,7 +68,7 @@ final class BuilderTests: XCTestCase {
             named: "other.html",
             contents: Data("--".utf8))
 
-        try builder.build(fromSource: siteDirectory.path)
+        try builder.build(source: siteDirectory)
         
         let result = try siteDirectory.file(at: "build/index.html").readAsString()
         let expected = "<title>Test Site</title><body>So Above -- So Below</body>"
@@ -90,7 +82,7 @@ final class BuilderTests: XCTestCase {
             named: "testpage.markdown",
             contents: Data("THIS IS **TEST**".utf8))
 
-        try builder.build(fromSource: siteDirectory.path)
+        try builder.build(source: siteDirectory)
         
         let result = try siteDirectory.file(at: "build/testpage/index.html").readAsString()
         let expected = "<title>Test Site</title><body><p>THIS IS <strong>TEST</strong></p></body>"
@@ -104,7 +96,7 @@ final class BuilderTests: XCTestCase {
             named: "testpage.html",
             contents: Data("THIS IS {{page.title}}".utf8))
 
-        try builder.build(fromSource: siteDirectory.path)
+        try builder.build(source: siteDirectory)
         
         let result = try siteDirectory.file(at: "build/testpage/index.html").readAsString()
         let expected = "<title>Test Site</title><body>THIS IS Testpage</body>"
@@ -119,7 +111,7 @@ final class BuilderTests: XCTestCase {
             contents: Data("THIS IS {{page.title}}".utf8))
 
         do {
-            try builder.build(fromSource: siteDirectory.path)
+            try builder.build(source: siteDirectory)
         } catch let e as BuilderError {
             XCTAssertEqual(e, BuilderError.unrecognizedTemplate("testpage.lol"))
         }

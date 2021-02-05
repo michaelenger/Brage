@@ -14,21 +14,12 @@ public struct Builder {
     /// Build a site based on a site directory.
     ///
     /// - Parameter fromSource: Path to the directory of the site to build.
-    public func build(fromSource sourcePath: String?) throws {
-        let siteDirectory: Folder
-        do {
-            siteDirectory = sourcePath != nil
-                ? try Folder(path: sourcePath!)
-                : Folder.current
-        } catch is FilesError<LocationErrorReason> {
-            throw BuilderError.missingSiteDirectory
-        }
-
+    public func build(source sourceDirectory: Folder) throws {
         // Load config and layout
-        let config = try loadConfig(from: siteDirectory)
+        let config = try loadConfig(from: sourceDirectory)
         let layoutTemplate: String
         do {
-            layoutTemplate = try siteDirectory.file(at: "layout.html").readAsString()
+            layoutTemplate = try sourceDirectory.file(at: "layout.html").readAsString()
         } catch is FilesError<LocationErrorReason> {
             throw BuilderError.missingLayoutTemplate
         }
@@ -36,23 +27,23 @@ public struct Builder {
 		// Get the pages directory
 		let pagesDirectory: Folder
 		do {
-			pagesDirectory = try siteDirectory.subfolder(at: "pages")
+			pagesDirectory = try sourceDirectory.subfolder(at: "pages")
 		} catch is FilesError<LocationErrorReason> {
 			throw BuilderError.missingPagesDirectory
 		}
 
 		// Clear and create build directory
 		do {
-			let buildDirectory = try siteDirectory.subfolder(at: "build")
+			let buildDirectory = try sourceDirectory.subfolder(at: "build")
 			try buildDirectory.delete()
 		} catch is FilesError<LocationErrorReason> {
 			// this is fine 🔥
 		}
-		let buildDirectory = try siteDirectory.createSubfolder(at: "build")
+		let buildDirectory = try sourceDirectory.createSubfolder(at: "build")
 
 		// Copy assets
 		do {
-			let assetsDirectory = try siteDirectory.subfolder(at: "assets")
+			let assetsDirectory = try sourceDirectory.subfolder(at: "assets")
 			try assetsDirectory.copy(to: buildDirectory)
 		} catch is FilesError<LocationErrorReason> {
 			// no assets to copy just create the directory
@@ -62,7 +53,7 @@ public struct Builder {
         // Construct render environment
         let environment: Environment
         do {
-            let templatePath = try siteDirectory.subfolder(named:"templates").path
+            let templatePath = try sourceDirectory.subfolder(named:"templates").path
             let fileSystemLoader = FileSystemLoader(paths: [Path(templatePath)])
             environment = Environment(loader: fileSystemLoader)
         } catch is FilesError<LocationErrorReason> {
@@ -177,7 +168,6 @@ public struct Builder {
 public enum BuilderError: Error, Equatable {
 	case missingLayoutTemplate
 	case missingPagesDirectory
-	case missingSiteDirectory
 	case missingSiteConfig
     case unrecognizedTemplate(String)
 }
