@@ -1,9 +1,8 @@
-//
-//  SiteConfigTests.swift
-//  
-//
-//  Created by Michael Enger on 03/02/2021.
-//
+/**
+ *  Brage
+ *  Copyright (c) Michael Enger 2021
+ *  MIT license, see LICENSE file for details
+ */
 
 import XCTest
 @testable import BrageCore

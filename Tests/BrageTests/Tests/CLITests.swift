@@ -1,9 +1,8 @@
-//
-//  File.swift
-//  
-//
-//  Created by Michael Enger on 05/02/2021.
-//
+/**
+ *  Brage
+ *  Copyright (c) Michael Enger 2021
+ *  MIT license, see LICENSE file for details
+ */
 
 import Files
 import XCTest
