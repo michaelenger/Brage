@@ -74,7 +74,7 @@ public struct Builder {
 				? String(repeating: "../", count: uri.count(of: Character("/")))
 				: "./"
 
-			let data = TemplateData(
+			let pageData = TemplateData(
 				site: TemplateSiteData(
 					title: config.title,
 					description: config.description,
@@ -86,30 +86,34 @@ public struct Builder {
 					title: uri == "/" ? "Index" : currentDirectory.name.titleified,
 					path: uri,
 					content: nil
-				)
+				),
+                data: config.data
 			)
 
 			// Render template
-			let targetFile = try currentDirectory.createFile(at: "index.html")
+			let targetFile = try currentDirectory.createFile(named: "index.html")
             let pageContent: String
             
             switch file.extension?.lowercased() {
             case "markdown", "md":
                 pageContent = try renderMarkdownTemplate(from: file)
             case "html":
-                pageContent = try renderStencilTemplate(environment: environment, from: file, data: data)
+                let fileContents = try file.readAsString()
+                pageContent = try renderStencilTemplate(environment: environment, template: fileContents, data: pageData)
             default:
                 throw BuilderError.unrecognizedTemplate(file.name)
             }
             
-            let content = try environment.renderTemplate(string: layoutTemplate, context: [
-                "site": data.site.dictionary as Any,
-                "page": [
-                    "title": data.page.title,
-                    "path": uri,
-                    "content": pageContent
-                ],
-            ])
+            let layoutData = TemplateData(
+                site: pageData.site,
+                page: TemplatePageData(
+                    title: pageData.page.title,
+                    path: uri,
+                    content: pageContent
+                ),
+                data: pageData.data
+            )
+            let content = try renderStencilTemplate(environment: environment, template: layoutTemplate, data: layoutData)
 
 			try targetFile.write(content)
 		}
@@ -122,9 +126,9 @@ public struct Builder {
     private func loadConfig(from directory: Folder) throws -> SiteConfig {
         let configString: String
         if directory.containsFile(named: "site.yaml") {
-            configString = try directory.file(at: "site.yaml").readAsString()
+            configString = try directory.file(named: "site.yaml").readAsString()
         } else if directory.containsFile(named: "site.yml") {
-            configString = try directory.file(at: "site.yml").readAsString()
+            configString = try directory.file(named: "site.yml").readAsString()
         } else {
             throw BuilderError.missingSiteConfig
         }
@@ -149,12 +153,21 @@ public struct Builder {
     /// - Parameter file: File to read and render from.
     /// - Parameter data: Data to send to the template.
     /// - Returns: Rendered HTML content.
-    private func renderStencilTemplate(environment: Environment, from file: File, data: TemplateData) throws -> String {
-		let fileContents = try file.readAsString()
-        
-        return try environment.renderTemplate(string: fileContents, context: [
-			"site": data.site.dictionary as Any,
-			"page": data.page.dictionary as Any,
+    private func renderStencilTemplate(environment: Environment, template: String, data: TemplateData) throws -> String {
+		return try environment.renderTemplate(string: template, context: [
+			"site": [
+                "title": data.site.title,
+                "description": data.site.description as Any,
+                "image": data.site.image as Any,
+                "root": data.site.root,
+                "assets": data.site.assets,
+            ],
+            "page": [
+                "title": data.page.title,
+                "path": data.page.path,
+                "content": data.page.content as Any,
+            ],
+            "data": data.data
 		])
 	}
 }
@@ -166,7 +179,7 @@ public enum BuilderError: Error, Equatable {
     case unrecognizedTemplate(String)
 }
 
-public struct TemplateSiteData: Codable {
+public struct TemplateSiteData {
 	public let title: String
 	public let description: String?
     public let image: String?
@@ -174,13 +187,14 @@ public struct TemplateSiteData: Codable {
 	public let assets: String
 }
 
-public struct TemplatePageData: Codable {
+public struct TemplatePageData {
 	public let title: String
 	public let path: String
 	public let content: String?
 }
 
-public struct TemplateData: Codable {
+public struct TemplateData {
 	public let site: TemplateSiteData
 	public let page: TemplatePageData
+    public let data: [String: Any]
 }

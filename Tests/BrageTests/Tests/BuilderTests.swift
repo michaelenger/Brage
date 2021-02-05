@@ -29,6 +29,8 @@ final class BuilderTests: XCTestCase {
             title: Test Site
             description: This is just a test.
             image: lol.png
+            data:
+              text: A friendly little 🌲
             """.utf8))
 		try! sourceDirectory.createFile(
             named: "layout.html",
@@ -129,6 +131,7 @@ final class BuilderTests: XCTestCase {
         try! pagesDirectory.createFile(
             named: "variables.html",
             contents: Data("""
+
             {{site.title}}
             {{site.description}}
             {{site.image}}
@@ -136,19 +139,24 @@ final class BuilderTests: XCTestCase {
             {{site.assets}}
             {{page.title}}
             {{page.path}}
+            {{data.text}}
+
             """.utf8))
 
         try builder.build(source: sourceDirectory, target: targetDirectory)
         
         let result = try sourceDirectory.file(at: "build/variables/index.html").readAsString()
         let expected = """
-        <title>Test Site</title><body>Test Site
+        <title>Test Site</title><body>
+        Test Site
         This is just a test.
         ../assets/lol.png
         ../
         ../assets/
         Variables
-        /variables</body>
+        /variables
+        A friendly little 🌲
+        </body>
         """
 
         XCTAssertEqual(result, expected)

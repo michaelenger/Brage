@@ -6,10 +6,11 @@
 
 import Yaml
 
-public struct SiteConfig: Codable, Equatable {
+public struct SiteConfig {
 	public let title: String
 	public let description: String?
     public let image: String?
+    public let data: [String: Any]
 
     /// Parse a YAML string into a site config.
     ///
@@ -21,15 +22,57 @@ public struct SiteConfig: Codable, Equatable {
         guard config["title"].string != nil else {
             throw SiteConfigParseError.missingTitle
         }
+        
+        var data: [String: Any] = [:]
+        if config["data"].dictionary != nil {
+            for (key, value) in config["data"].dictionary! {
+                data[key.string!] = try convert(value)
+            }
+        }
 
         return SiteConfig(
             title: config["title"].string!,
             description: config["description"].string,
-            image: config["image"].string
+            image: config["image"].string,
+            data: data
         )
     }
 }
 
+/// Convert a YAML value to a regular object.
+///
+/// - Parameter value: YAML value to convert.
+/// - Returns: The converted value (nil if unable to convert).
+private func convert(_ value: Yaml) throws -> Any {
+    if value.array != nil {
+        return try value.array!.map { (item) -> Any in
+            return try convert(item)
+        }
+    }
+    if value.dictionary != nil {
+        var dict: [String: Any] = [:]
+        for (k, v) in value.dictionary! {
+            dict[k.string!] = try convert(v)
+        }
+        return dict
+    }
+    if value.bool != nil {
+        return value.bool!
+    }
+    if value.int != nil {
+        return value.int!
+    }
+    if value.double != nil {
+        return value.double!
+    }
+    if value.string != nil {
+        return value.string!
+    }
+
+    throw SiteConfigParseError.conversionError("Unable to convert \(value)")
+}
+
 public enum SiteConfigParseError: Error {
 	case missingTitle
+    case conversionError(String)
 }

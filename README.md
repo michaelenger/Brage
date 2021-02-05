@@ -33,6 +33,7 @@ The config is defined in a `site.yaml` file in the site directory. It defines so
 * `title` Title of the site.
 * `description` Description of the site.
 * `image` Social media preview image relative to the assets directory.
+* `data` Any custom data you want to inject into the Stencil templates (see below).
 
 ### Layout Template
 
@@ -60,6 +61,31 @@ All Stencil template (including the layout template) are renderered with the fol
     * `title` Title of the page.
     * `content` Content of the page (only available in the layout template).
     * `path` URI path to the page.
+* `data` Custom data defined in the site config (see below).
+
+#### Data
+
+Using the `data` field in the site config file you can inject any custom data (as long as it can be defined in YAML format) into the Stencil templates.
+
+For example the following data entry defined in the config file:
+
+```yaml
+...
+data:
+  music:
+    - style: Jazz
+      link: https://www.youtube.com/watch?v=ZyBl3noTNSs
+    - style: Lo-fi
+      link: https://www.youtube.com/watch?v=Osqf4oIK0E8
+```
+
+Would allow you to iterate over the entries in the template:
+
+```html
+{% for item in data.music %}
+  <a href="{{ item.video }}">{{ item.style }}</a>
+{% endfor %}
+```
 
 #### Including/extending Templates
 
