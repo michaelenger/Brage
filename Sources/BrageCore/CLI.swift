@@ -5,6 +5,7 @@
  */
 
 import Files
+import Foundation
 
 public struct CLI {
 	public init() {}
@@ -21,10 +22,20 @@ public struct CLI {
 		case "new":
 			print("TODO")
 		case "build":
-            let siteDirectory = try getWorkingDirectory(arguments.count > 2 ? arguments[2] : nil)
+            let sourceDirectory = try getWorkingDirectory(
+                arguments.count > 2
+                    ? arguments[2]
+                    : nil
+            )
+            
+            let targetDirectory = try makeWorkingDirectory(
+                arguments.count > 3
+                    ? arguments[3]
+                    : sourceDirectory.path + "/build"
+            )
             
 			let builder = Builder()
-            try builder.build(source: siteDirectory)
+            try builder.build(source: sourceDirectory, target: targetDirectory)
 		case "serve":
 			print("TODO")
 		default:
@@ -44,6 +55,24 @@ public struct CLI {
         } catch is FilesError<LocationErrorReason> {
             throw CLIError.missingSiteDirectory
         }
+    }
+    
+    /// Get directory to work in, creating it if it doesn't exist.
+    ///
+    /// - Parameter path: Path to the folder to create.
+    /// - Returns: Working directory.
+    private func makeWorkingDirectory(_ path: String) throws -> Folder {
+        do {
+            return try Folder(path: path)
+        } catch is FilesError<LocationErrorReason> {
+            let fileManager = FileManager()
+            try fileManager.createDirectory(
+                atPath: path,
+                withIntermediateDirectories: true
+            )
+        }
+        
+        return try Folder(path: path) // this should work now
     }
     
     /// Display the help text.

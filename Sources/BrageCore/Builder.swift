@@ -13,8 +13,9 @@ import Stencil
 public struct Builder {
     /// Build a site based on a site directory.
     ///
-    /// - Parameter fromSource: Path to the directory of the site to build.
-    public func build(source sourceDirectory: Folder) throws {
+    /// - Parameter source: Site directory of the site to build.
+    /// - Parameter target: Destination for the rendered HTML files.
+    public func build(source sourceDirectory: Folder, target targetDirectory: Folder) throws {
         // Load config and layout
         let config = try loadConfig(from: sourceDirectory)
         let layoutTemplate: String
@@ -32,22 +33,13 @@ public struct Builder {
 			throw BuilderError.missingPagesDirectory
 		}
 
-		// Clear and create build directory
-		do {
-			let buildDirectory = try sourceDirectory.subfolder(at: "build")
-			try buildDirectory.delete()
-		} catch is FilesError<LocationErrorReason> {
-			// this is fine 🔥
-		}
-		let buildDirectory = try sourceDirectory.createSubfolder(at: "build")
-
 		// Copy assets
 		do {
 			let assetsDirectory = try sourceDirectory.subfolder(at: "assets")
-			try assetsDirectory.copy(to: buildDirectory)
+			try assetsDirectory.copy(to: targetDirectory)
 		} catch is FilesError<LocationErrorReason> {
 			// no assets to copy just create the directory
-			_ = try buildDirectory.createSubfolder(at: "assets")
+			_ = try targetDirectory.createSubfolder(at: "assets")
 		}
         
         // Construct render environment
@@ -65,17 +57,17 @@ public struct Builder {
 		let files = pagesDirectory.files.recursive
 		for file in files {
 			// Determine where to render
-			var targetDirectory = buildDirectory
+			var currentDirectory = targetDirectory
 			if file.nameExcludingExtension != "index" {
 				let targetPath = file.path(relativeTo: pagesDirectory)
 					.split(separator: ".")
 					.dropLast()
 					.joined()
-				targetDirectory = try buildDirectory.createSubfolder(at: targetPath)
+				currentDirectory = try targetDirectory.createSubfolder(at: targetPath)
 			}
 
 			// Build data object
-			let uri = "/\(targetDirectory.path(relativeTo: buildDirectory))"
+			let uri = "/\(currentDirectory.path(relativeTo: targetDirectory))"
 			let rootPath = uri != "/"
 				? String(repeating: "../", count: uri.count(of: Character("/")))
 				: "./"
@@ -89,14 +81,14 @@ public struct Builder {
 					assets: "\(rootPath)assets/"
 				),
 				page: TemplatePageData(
-					title: uri == "/" ? "Index" : targetDirectory.name.titleified,
+					title: uri == "/" ? "Index" : currentDirectory.name.titleified,
 					path: uri,
 					content: nil
 				)
 			)
 
 			// Render template
-			let targetFile = try targetDirectory.createFile(at: "index.html")
+			let targetFile = try currentDirectory.createFile(at: "index.html")
             let pageContent: String
             
             switch file.extension?.lowercased() {
