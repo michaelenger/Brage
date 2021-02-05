@@ -20,7 +20,7 @@ public struct Builder {
         let config = try loadConfig(from: sourceDirectory)
         let layoutTemplate: String
         do {
-            layoutTemplate = try sourceDirectory.file(at: "layout.html").readAsString()
+            layoutTemplate = try sourceDirectory.file(named: "layout.html").readAsString()
         } catch is FilesError<LocationErrorReason> {
             throw BuilderError.missingLayoutTemplate
         }
@@ -28,18 +28,20 @@ public struct Builder {
 		// Get the pages directory
 		let pagesDirectory: Folder
 		do {
-			pagesDirectory = try sourceDirectory.subfolder(at: "pages")
+			pagesDirectory = try sourceDirectory.subfolder(named: "pages")
 		} catch is FilesError<LocationErrorReason> {
 			throw BuilderError.missingPagesDirectory
 		}
 
 		// Copy assets
 		do {
-			let assetsDirectory = try sourceDirectory.subfolder(at: "assets")
+			let assetsDirectory = try sourceDirectory.subfolder(named: "assets")
+            if targetDirectory.containsSubfolder(named: "assets") {
+                try targetDirectory.subfolder(named: "assets").delete()
+            }
 			try assetsDirectory.copy(to: targetDirectory)
 		} catch is FilesError<LocationErrorReason> {
-			// no assets to copy just create the directory
-			_ = try targetDirectory.createSubfolder(at: "assets")
+			// No assets to copy
 		}
         
         // Construct render environment
