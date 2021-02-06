@@ -47,9 +47,9 @@ public struct Builder {
         // Construct render environment
         let environment: Environment
         do {
-            let templatePath = try sourceDirectory.subfolder(named:"templates").path
-            let fileSystemLoader = FileSystemLoader(paths: [Path(templatePath)])
-            environment = Environment(loader: fileSystemLoader)
+            let templateDirectory = try sourceDirectory.subfolder(named:"templates")
+            let loader = MarkdownLoader(templateDirectory: templateDirectory)
+            environment = Environment(loader: loader)
         } catch is FilesError<LocationErrorReason> {
             // No templates for you
             environment = Environment()
