@@ -1,6 +1,6 @@
 # Brage
 
-_Brage er i den norrøne mytologien guden for diktning og skaldekunst._ [WikiPedia](https://no.wikipedia.org/wiki/Brage)
+_Brage er i den norrøne mytologien guden for diktning og skaldekunst. [...] Brage var meget klok og veltalende._ [Wikipedia](https://no.wikipedia.org/wiki/Brage)
 
 Site builder for generating sites based on [Stencil](https://github.com/stencilproject/Stencil) and [Markdown](https://www.markdownguide.org/) templates.
 
