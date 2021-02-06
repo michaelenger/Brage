@@ -10,6 +10,7 @@ let package = Package(
         .package(url: "https://github.com/johnsundell/files.git", from: "4.0.0"),
         .package(url: "https://github.com/JohnSundell/Ink.git", from: "0.5.0"),
         .package(url: "https://github.com/stencilproject/Stencil.git", from: "0.14.0"),
+        .package(url: "https://github.com/httpswift/swifter.git", from: "1.5.0"),
         .package(url: "https://github.com/behrang/YamlSwift.git", from: "3.4.4"),
     ],
     targets: [
@@ -17,7 +18,7 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
             name: "BrageCore",
-            dependencies: ["Files", "Ink", "Stencil", "Yaml"]),
+            dependencies: ["Files", "Ink", "Stencil", "Swifter", "Yaml"]),
         .target(
             name: "Brage",
             dependencies: ["BrageCore"]),

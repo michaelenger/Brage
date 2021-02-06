@@ -21,6 +21,7 @@ public struct CLI {
 		switch arguments[1] {
 		case "new":
 			print("TODO")
+
 		case "build":
             let sourceDirectory = try getWorkingDirectory(
                 arguments.count > 2
@@ -36,8 +37,17 @@ public struct CLI {
             
 			let builder = Builder()
             try builder.build(source: sourceDirectory, target: targetDirectory)
+
 		case "serve":
-			print("TODO")
+			let sourceDirectory = try getWorkingDirectory(
+                arguments.count > 2
+                    ? arguments[2]
+                    : nil
+            )
+            
+            let server = Server(source: sourceDirectory)
+            try server.start()
+
 		default:
 			showHelp()
 		}
