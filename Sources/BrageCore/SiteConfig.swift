@@ -24,9 +24,13 @@ public struct SiteConfig {
         }
         
         var data: [String: Any] = [:]
-        if config["data"].dictionary != nil {
-            for (key, value) in config["data"].dictionary! {
-                data[key.string!] = try convert(value)
+        for (key, value) in config.dictionary! {
+            let key = key.string!
+            switch key {
+            case "description", "title", "image":
+                break // just skip it
+            default:
+                data[key] = try convert(value)
             }
         }
 

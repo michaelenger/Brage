@@ -26,8 +26,8 @@ final class RendererTests: XCTestCase {
             title: Test Site
             description: This is just a test.
             image: lol.png
-            data:
-              text: A friendly little 🌲
+            
+            text: A friendly little 🌲
             """.utf8))
         try! sourceDirectory.createFile(
             named: "layout.html",

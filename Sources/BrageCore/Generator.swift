@@ -20,19 +20,18 @@ public struct Generator {
         description: This is the page desc.
         image: bob.png
 
-        data:
-          emoji:
-            - 🍍
-            - 🥶
-            - 🆑
-          attempt: "made"
-          objects:
-            - type: explosive
-              title: Bombs
-            - type: benign
-              title: Also bombs
-            - type: harmless
-              title: Bombs again
+        emoji:
+          - 🍍
+          - 🥶
+          - 🆑
+        attempt: "made"
+        objects:
+          - type: explosive
+            title: Bombs
+          - type: benign
+            title: Also bombs
+          - type: harmless
+            title: Bombs again
         """)
 
         // Layout

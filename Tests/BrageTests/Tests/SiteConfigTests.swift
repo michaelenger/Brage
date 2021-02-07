@@ -27,20 +27,20 @@ final class SiteConfigTests: XCTestCase {
         title: Test
         description: Some text.
         image: lol.png
-        data:
-          boolean: true
-          int: 1234
-          double: 12.34
-          string: "Just text."
-          array:
-            - one
-            - two
-            - three
-          nested:
-            - key: value
-              emoji: 💸
-            - key: to the castle
-              emoji: 🗝
+
+        boolean: true
+        int: 1234
+        double: 12.34
+        string: "Just text."
+        array:
+          - one
+          - two
+          - three
+        nested:
+          - key: value
+            emoji: 💸
+          - key: to the castle
+            emoji: 🗝
         """
         let result = try! SiteConfig.parse(from: input)
 
