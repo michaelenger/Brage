@@ -26,7 +26,6 @@ public struct Builder {
     
     /// Build a site based on a site directory.
     ///
-    /// - Parameter source: Site directory of the site to build.
     /// - Parameter target: Destination for the rendered HTML files.
     public func build(target targetDirectory: Folder) throws {
         // Get the pages directory
