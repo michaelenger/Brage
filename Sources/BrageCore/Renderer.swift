@@ -10,7 +10,7 @@ import Stencil
 
 /// Renderer which can transform a template file into HTML content.
 public struct Renderer {
-    private let layoutTemplate: String
+    private let layoutFile: File
     private let siteConfig: SiteConfig
     private let sourceDirectory: Folder
     private let stencilEnvironment: Environment
@@ -35,7 +35,7 @@ public struct Renderer {
         
         // Read the layout template
         do {
-            self.layoutTemplate = try sourceDirectory.file(named: "layout.html").readAsString()
+            self.layoutFile = try sourceDirectory.file(named: "layout.html")
         } catch is FilesError<LocationErrorReason> {
             throw RendererError.missingLayoutTemplate
         }
@@ -84,10 +84,9 @@ public struct Renderer {
         case "markdown", "md":
             pageContent = try renderMarkdownTemplate(from: file)
         case "html":
-            let fileContents = try file.readAsString()
             pageContent = try renderStencilTemplate(
+                from: file,
                 environment: stencilEnvironment,
-                template: fileContents,
                 data: pageData
             )
         default:
@@ -103,9 +102,10 @@ public struct Renderer {
             ),
             data: pageData.data
         )
+
         return try renderStencilTemplate(
+            from: layoutFile,
             environment: stencilEnvironment,
-            template: layoutTemplate,
             data: layoutData
         )
     }
@@ -123,12 +123,14 @@ public struct Renderer {
 
     /// Render a Stencil template from a specified file.
     ///
+    /// - Parameter from: File to read and render from.
     /// - Parameter environment: Render environment to use.
-    /// - Parameter file: File to read and render from.
     /// - Parameter data: Data to send to the template.
     /// - Returns: Rendered HTML content.
-    private func renderStencilTemplate(environment: Environment, template: String, data: TemplateData) throws -> String {
-        return try environment.renderTemplate(string: template, context: [
+    private func renderStencilTemplate(from file: File, environment: Environment, data: TemplateData) throws -> String {
+        let fileContents = try file.readAsString()
+
+        return try environment.renderTemplate(string: fileContents, context: [
             "site": [
                 "title": data.site.title,
                 "description": data.site.description as Any,
