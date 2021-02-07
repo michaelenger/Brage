@@ -147,6 +147,13 @@ public struct Renderer {
     }
 }
 
+/// File extensions which are supported by the renderer.
+public enum RendererFileExtensions: String, CaseIterable {
+    case html = "html"
+    case markdown = "markdown"
+    case markdownShort = "md"
+}
+
 public enum RendererError: Error, Equatable {
     case missingLayoutTemplate
     case missingPagesDirectory

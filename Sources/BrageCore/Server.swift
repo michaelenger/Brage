@@ -10,13 +10,15 @@ import Swifter
 
 /// Server which provides the templates as compiled HTML.
 public struct Server {
+    let renderer: Renderer
     let server: HttpServer
     let sourceDirectory: Folder
     
     /// Initialize the server with the specified source directory.
     ///
     /// - Parameter source: Site directory to serve files from.
-    public init(source: Folder) {
+    public init(source: Folder, renderer: Renderer) {
+        self.renderer = renderer
         self.server = HttpServer()
         self.sourceDirectory = source
         
@@ -55,12 +57,24 @@ public struct Server {
     /// - Returns: HTTP response.
     private func respond(request: HttpRequest) -> HttpResponse {
         let targetFile: String = request.path == "/"
-            ? "pages/index.html"
-            : "pages\(request.path).html"
+            ? "pages/index"
+            : "pages\(request.path)"
     
         do {
-            let fileContents = try sourceDirectory.file(at: targetFile).readAsString()
-            return .ok(.html(fileContents))
+            var file: File? = nil
+            for ext in RendererFileExtensions.allCases {
+                if sourceDirectory.containsFile(at: "\(targetFile).\(ext.rawValue)") {
+                    file = try sourceDirectory.file(at: "\(targetFile).\(ext.rawValue)")
+                    break
+                }
+            }
+
+            guard file != nil else {
+                return .notFound
+            }
+            
+            let contents = try renderer.render(file: file!, uri: request.path)
+            return .ok(.html(contents))
         } catch is FilesError<LocationErrorReason> {
             return .notFound
         } catch {

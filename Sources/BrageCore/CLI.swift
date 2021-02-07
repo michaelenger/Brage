@@ -45,8 +45,9 @@ public struct CLI {
                     ? arguments[2]
                     : nil
             )
+            let renderer = try Renderer(source: sourceDirectory)
             
-            let server = Server(source: sourceDirectory)
+            let server = Server(source: sourceDirectory, renderer: renderer)
             try server.start()
 
 		default:
