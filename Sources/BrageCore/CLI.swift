@@ -20,7 +20,10 @@ public struct CLI {
 
 		switch arguments[1] {
 		case "new":
-			print("TODO")
+            let targetDirectory = arguments.count > 2
+                ? try makeWorkingDirectory(arguments[2])
+                : Folder.current
+            try Generator.generate(target: targetDirectory)
 
 		case "build":
             let sourceDirectory = try getWorkingDirectory(

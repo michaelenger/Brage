@@ -4,8 +4,6 @@ _Brage er i den norrøne mytologien guden for diktning og skaldekunst. [...] Bra
 
 Site builder for generating sites based on [Stencil](https://github.com/stencilproject/Stencil) and [Markdown](https://www.markdownguide.org/) templates.
 
-**NOTE** This application is currently under development and a lot of this readme is reflecting ambitious plans rather than reality.
-
 ## Usage
 
 Run the CLI tool along with any of the commands along with an optional site directory. If no directory is present it will use the current directory.
