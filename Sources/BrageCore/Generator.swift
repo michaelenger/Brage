@@ -13,6 +13,8 @@ public struct Generator {
     ///
     /// - Parameter target: Destination for the example files.
     public static func generate(target targetDirectory: Folder) throws {
+        Logger.debug("Generating example site in \(targetDirectory.path)")
+
         // Site config
         try targetDirectory.createFile(named: "site.yaml").write("""
         ---

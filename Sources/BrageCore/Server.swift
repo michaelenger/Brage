@@ -41,6 +41,8 @@ public struct Server {
     ///
     /// - Parameter port: Port to listen at.
     public func start(port: UInt16 = 8080) throws {
+        Logger.debug("Starting server for \(sourceDirectory.path) at localhost:\(port)")
+
         let semaphore = DispatchSemaphore(value: 0)
         do {
             try server.start(port, forceIPv4: true)
@@ -56,6 +58,8 @@ public struct Server {
     /// - Parameter request: HTTP request to respond to.
     /// - Returns: HTTP response.
     private func respond(request: HttpRequest) -> HttpResponse {
+        Logger.debug("Received request for \(request.path)")
+
         let targetFile: String = request.path == "/"
             ? "pages/index"
             : "pages\(request.path)"
@@ -70,9 +74,13 @@ public struct Server {
             }
 
             guard file != nil else {
+                Logger.error("No template found for: \(request.path)")
                 return .notFound
             }
             
+            let relativePath = file!.path(relativeTo: sourceDirectory)
+            Logger.debug("Serving file: \(relativePath)")
+
             let contents = try renderer.render(file: file!, uri: request.path)
             return .ok(.html(contents))
         } catch is FilesError<LocationErrorReason> {

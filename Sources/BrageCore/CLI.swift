@@ -32,13 +32,13 @@ public struct CLI {
                     : nil
             )
             let renderer = try Renderer(source: sourceDirectory)
-            
+
             let targetDirectory = try makeWorkingDirectory(
                 arguments.count > 3
                     ? arguments[3]
                     : sourceDirectory.path + "/build"
             )
-            
+
             let builder = Builder(source: sourceDirectory, renderer: renderer)
             try builder.build(target: targetDirectory)
 
@@ -49,7 +49,7 @@ public struct CLI {
                     : nil
             )
             let renderer = try Renderer(source: sourceDirectory)
-            
+
             let server = Server(source: sourceDirectory, renderer: renderer)
             try server.start()
 

@@ -28,6 +28,8 @@ public struct Builder {
     ///
     /// - Parameter target: Destination for the rendered HTML files.
     public func build(target targetDirectory: Folder) throws {
+        Logger.debug("Building site from \(sourceDirectory.path) to \(targetDirectory.path)")
+
         // Get the pages directory
 		let pagesDirectory: Folder
 		do {
@@ -42,11 +44,15 @@ public struct Builder {
             if targetDirectory.containsSubfolder(named: "assets") {
                 try targetDirectory.subfolder(named: "assets").delete()
             }
+            
+            Logger.debug("Copying assets...")
 			try assetsDirectory.copy(to: targetDirectory)
 		} catch is FilesError<LocationErrorReason> {
 			// No assets to copy
 		}
 
+        Logger.debug("Rendering pages...")
+        
 		// Render all page
 		let files = pagesDirectory.files.recursive
 		for file in files {
@@ -66,6 +72,8 @@ public struct Builder {
 			// Render template
 			let targetFile = try currentDirectory.createFile(named: "index.html")
             let content = try renderer.render(file: file, uri: uri)
+            
+            Logger.debug("Rendering \(targetFile.path(relativeTo: targetDirectory))")
 
 			try targetFile.write(content)
 		}
