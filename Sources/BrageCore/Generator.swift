@@ -78,7 +78,7 @@ public struct Generator {
 
         let pagesDirectory = try targetDirectory.createSubfolderIfNeeded(at: "pages")
         try pagesDirectory.createFile(named: "index.html").write("""
-        <p>This is the {{ page.title }} page and will be rendered at {{ page.path }}.</p>
+        <p>This is the {{ page.title }} page and will be rendered at {{ page.uri }}.</p>
 
         <p><img src="{{ site.image }}"></p>
 
@@ -107,7 +107,7 @@ public struct Generator {
         try pagesDirectory.createSubfolderIfNeeded(at: "sub").createFile(named: "page.html").write("""
         <h2>Sub-page</h2>
 
-        This is a sub page and is rendered at {{ page.path }}.
+        This is a sub page and is rendered at {{ page.uri }}.
 
         {% include "template.html" %}
         {% include "template.markdown" %}

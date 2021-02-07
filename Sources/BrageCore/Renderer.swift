@@ -72,7 +72,7 @@ public struct Renderer {
             ),
             page: TemplatePageData(
                 title: file.nameExcludingExtension.titleified,
-                path: uri,
+                uri: uri,
                 content: nil
             ),
             data: siteConfig.data
@@ -99,7 +99,7 @@ public struct Renderer {
             site: pageData.site,
             page: TemplatePageData(
                 title: pageData.page.title,
-                path: uri,
+                uri: uri,
                 content: pageContent
             ),
             data: pageData.data
@@ -139,7 +139,7 @@ public struct Renderer {
             ],
             "page": [
                 "title": data.page.title,
-                "path": data.page.path,
+                "uri": data.page.uri,
                 "content": data.page.content as Any,
             ],
             "data": data.data
@@ -171,7 +171,7 @@ public struct TemplateSiteData {
 
 public struct TemplatePageData {
     public let title: String
-    public let path: String
+    public let uri: String
     public let content: String?
 }
 

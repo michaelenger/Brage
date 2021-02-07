@@ -58,7 +58,7 @@ All Stencil template (including the layout template) are renderered with the fol
 * `page` Page meta data.
     * `title` Title of the page.
     * `content` Content of the page (only available in the layout template).
-    * `path` URI path to the page.
+    * `uri` URI path to the page.
 * `data` Custom data defined in the site config (see below).
 
 #### Data

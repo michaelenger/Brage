@@ -50,7 +50,7 @@ final class BuilderTests: XCTestCase {
 	}
 
 	func testBuildIndex() throws {
-        try pagesDirectory.createFile(named: "index.html").write("I am {{page.title}} at {{page.path}}.")
+        try pagesDirectory.createFile(named: "index.html").write("I am {{page.title}} at {{page.uri}}.")
         try builder.build(target: targetDirectory)
         
         let contents = try targetDirectory.file(at: "index.html").readAsString()
@@ -61,9 +61,9 @@ final class BuilderTests: XCTestCase {
     
     func testBuildSubDirectory() throws {
         let subDirectory = try pagesDirectory.createSubfolderIfNeeded(at: "sub")
-        try subDirectory.createFile(named: "test.html").write("I am {{page.title}} at {{page.path}}.")
+        try subDirectory.createFile(named: "test.html").write("I am {{page.title}} at {{page.uri}}.")
         let anotherDirectory = try pagesDirectory.createSubfolderIfNeeded(at: "another")
-        try anotherDirectory.createFile(named: "page.html").write("I am {{page.title}} at {{page.path}}.")
+        try anotherDirectory.createFile(named: "page.html").write("I am {{page.title}} at {{page.uri}}.")
         try builder.build(target: targetDirectory)
         
         var contents = try targetDirectory.file(at: "sub/test/index.html").readAsString()

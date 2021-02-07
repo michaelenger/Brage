@@ -128,7 +128,7 @@ final class RendererTests: XCTestCase {
             {{site.root}}
             {{site.assets}}
             {{page.title}}
-            {{page.path}}
+            {{page.uri}}
             {{data.text}}
 
             """.utf8))
@@ -162,7 +162,7 @@ final class RendererTests: XCTestCase {
             {{site.root}}
             {{site.assets}}
             {{page.title}}
-            {{page.path}}
+            {{page.uri}}
             {{data.text}}
 
             """.utf8))
