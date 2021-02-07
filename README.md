@@ -54,7 +54,6 @@ All Stencil template (including the layout template) are renderered with the fol
     * `description` Description of the site (from the site config).
     * `image` Social media preview image (from the site config).
     * `root` Relative path to the root directory.
-    * `assets` Relative path to the assets directory.
 * `page` Page meta data.
     * `title` Title of the page.
     * `content` Content of the page (only available in the layout template).

@@ -66,9 +66,8 @@ public struct Renderer {
             site: TemplateSiteData(
                 title: siteConfig.title,
                 description: siteConfig.description,
-                image: siteConfig.image != nil ? "\(rootPath)assets/\(siteConfig.image!)" : nil,
-                root: rootPath,
-                assets: "\(rootPath)assets/"
+                image: siteConfig.image,
+                root: rootPath
             ),
             page: TemplatePageData(
                 title: file.nameExcludingExtension.titleified,
@@ -135,7 +134,6 @@ public struct Renderer {
                 "description": data.site.description as Any,
                 "image": data.site.image as Any,
                 "root": data.site.root,
-                "assets": data.site.assets,
             ],
             "page": [
                 "title": data.page.title,
@@ -166,7 +164,6 @@ public struct TemplateSiteData {
     public let description: String?
     public let image: String?
     public let root: String
-    public let assets: String
 }
 
 public struct TemplatePageData {

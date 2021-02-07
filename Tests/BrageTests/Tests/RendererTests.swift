@@ -126,7 +126,6 @@ final class RendererTests: XCTestCase {
             {{site.description}}
             {{site.image}}
             {{site.root}}
-            {{site.assets}}
             {{page.title}}
             {{page.uri}}
             {{data.text}}
@@ -139,9 +138,8 @@ final class RendererTests: XCTestCase {
         <title>Test Site</title><body>
         Test Site
         This is just a test.
-        ./assets/lol.png
+        lol.png
         ./
-        ./assets/
         Testpage
         /
         A friendly little 🌲
@@ -160,7 +158,6 @@ final class RendererTests: XCTestCase {
             {{site.description}}
             {{site.image}}
             {{site.root}}
-            {{site.assets}}
             {{page.title}}
             {{page.uri}}
             {{data.text}}
@@ -173,9 +170,8 @@ final class RendererTests: XCTestCase {
         <title>Test Site</title><body>
         Test Site
         This is just a test.
-        ../../assets/lol.png
+        lol.png
         ../../
-        ../../assets/
         Testpage
         /some/test
         A friendly little 🌲
