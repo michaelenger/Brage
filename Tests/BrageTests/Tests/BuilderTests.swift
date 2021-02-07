@@ -10,7 +10,9 @@ import XCTest
 
 final class BuilderTests: XCTestCase {
 	private var sourceDirectory: Folder!
+    private var pagesDirectory: Folder!
     private var targetDirectory: Folder!
+    private var renderer: Renderer!
     private var builder: Builder!
 
 	override func setUp() {
@@ -19,6 +21,7 @@ final class BuilderTests: XCTestCase {
 		// Create temporary directory
 		sourceDirectory = try! Folder.temporary.createSubfolderIfNeeded(withName: ".builderTests")
 		try! sourceDirectory.empty()
+        pagesDirectory = try! sourceDirectory.createSubfolderIfNeeded(at: "pages")
         targetDirectory = try! sourceDirectory.createSubfolderIfNeeded(withName: "build")
 
 		// Fill it with some example data
@@ -35,8 +38,9 @@ final class BuilderTests: XCTestCase {
 		try! sourceDirectory.createFile(
             named: "layout.html",
 			contents: Data("<title>{{site.title}}</title><body>{{page.content}}</body>".utf8))
-        
-        self.builder = Builder()
+
+        self.renderer = try! Renderer(source: sourceDirectory)
+        self.builder = Builder(source: sourceDirectory, renderer: self.renderer)
 	}
 
 	override func tearDown() {
@@ -45,120 +49,50 @@ final class BuilderTests: XCTestCase {
 		super.tearDown()
 	}
 
-	func testBuildMissingSiteConfig() throws {
-		try! sourceDirectory.empty()
+	func testBuildIndex() throws {
+        try pagesDirectory.createFile(named: "index.html").write("I am {{page.title}} at {{page.path}}.")
+        try builder.build(target: targetDirectory)
         
-		do {
-            try builder.build(source: sourceDirectory, target: targetDirectory)
-		} catch let e as BuilderError {
-			XCTAssertEqual(e, BuilderError.missingSiteConfig)
-		}
-	}
-
-	func testBuildMissingLayoutTemplate() throws {
-        let layoutFile = try! sourceDirectory.file(named: "layout.html")
-		try! layoutFile.delete()
-
-		do {
-            try builder.build(source: sourceDirectory, target: targetDirectory)
-		} catch let e as BuilderError {
-			XCTAssertEqual(e, BuilderError.missingLayoutTemplate)
-		}
+        let contents = try targetDirectory.file(at: "index.html").readAsString()
+        XCTAssertEqual(contents, """
+        <title>Test Site</title><body>I am Index at /.</body>
+        """)
 	}
     
-    func testRenderImportedTemplate() throws {
-        let pagesDirectory = try sourceDirectory.createSubfolderIfNeeded(withName: "pages")
-        try! pagesDirectory.createFile(
-            named: "index.html",
-            contents: Data("So Above {% include \"other.html\" %} So Below".utf8))
-    
-        let templateDirectory = try sourceDirectory.createSubfolderIfNeeded(withName: "templates")
-        try! templateDirectory.createFile(
-            named: "other.html",
-            contents: Data("--".utf8))
-
-        try builder.build(source: sourceDirectory, target: targetDirectory)
+    func testBuildSubDirectory() throws {
+        let subDirectory = try pagesDirectory.createSubfolderIfNeeded(at: "sub")
+        try subDirectory.createFile(named: "test.html").write("I am {{page.title}} at {{page.path}}.")
+        let anotherDirectory = try pagesDirectory.createSubfolderIfNeeded(at: "another")
+        try anotherDirectory.createFile(named: "page.html").write("I am {{page.title}} at {{page.path}}.")
+        try builder.build(target: targetDirectory)
         
-        let result = try sourceDirectory.file(at: "build/index.html").readAsString()
-        let expected = "<title>Test Site</title><body>So Above -- So Below</body>"
-        
-        XCTAssertEqual(result, expected)
+        var contents = try targetDirectory.file(at: "sub/test/index.html").readAsString()
+        XCTAssertEqual(contents, """
+        <title>Test Site</title><body>I am Test at /sub/test.</body>
+        """)
+        contents = try targetDirectory.file(at: "another/page/index.html").readAsString()
+        XCTAssertEqual(contents, """
+        <title>Test Site</title><body>I am Page at /another/page.</body>
+        """)
     }
     
-    func testRenderMarkdownTemplate() throws {
-        let pagesDirectory = try sourceDirectory.createSubfolderIfNeeded(withName: "pages")
-        try! pagesDirectory.createFile(
-            named: "testpage.markdown",
-            contents: Data("THIS IS **TEST**".utf8))
-
-        try builder.build(source: sourceDirectory, target: targetDirectory)
-        
-        let result = try sourceDirectory.file(at: "build/testpage/index.html").readAsString()
-        let expected = "<title>Test Site</title><body><p>THIS IS <strong>TEST</strong></p></body>"
-        
-        XCTAssertEqual(result, expected)
-    }
-
-	func testRenderStencilTemplate() throws {
-        let pagesDirectory = try sourceDirectory.createSubfolderIfNeeded(withName: "pages")
-        try! pagesDirectory.createFile(
-            named: "testpage.html",
-            contents: Data("THIS IS {{page.title}}".utf8))
-
-        try builder.build(source: sourceDirectory, target: targetDirectory)
-        
-        let result = try sourceDirectory.file(at: "build/testpage/index.html").readAsString()
-        let expected = "<title>Test Site</title><body>THIS IS Testpage</body>"
-        
-        XCTAssertEqual(result, expected)
-    }
-    
-    func testRenderUnknownTemplate() throws {
-        let pagesDirectory = try sourceDirectory.createSubfolderIfNeeded(withName: "pages")
-        try! pagesDirectory.createFile(
-            named: "testpage.lol",
-            contents: Data("THIS IS {{page.title}}".utf8))
-
+    func testBuildMissingPages() throws {
         do {
-            try builder.build(source: sourceDirectory, target: targetDirectory)
+            try builder.build(target: targetDirectory)
         } catch let e as BuilderError {
-            XCTAssertEqual(e, BuilderError.unrecognizedTemplate("testpage.lol"))
+            XCTAssertEqual(e, BuilderError.missingPagesDirectory)
         }
     }
     
-    func testStencilVariables() throws {
-        let pagesDirectory = try sourceDirectory.createSubfolderIfNeeded(withName: "pages")
-        try! pagesDirectory.createFile(
-            named: "variables.html",
-            contents: Data("""
-
-            {{site.title}}
-            {{site.description}}
-            {{site.image}}
-            {{site.root}}
-            {{site.assets}}
-            {{page.title}}
-            {{page.path}}
-            {{data.text}}
-
-            """.utf8))
-
-        try builder.build(source: sourceDirectory, target: targetDirectory)
+    func testBuildAssets() throws {
+        let assetsDirectory = try sourceDirectory.createSubfolderIfNeeded(at: "assets")
+        try assetsDirectory.createFile(named: "styles.css").write("body { background: '#f09'; }")
+        try assetsDirectory.createFile(named: "js/scripts.js").write("console.log('It works!');")
+        try builder.build(target: targetDirectory)
         
-        let result = try sourceDirectory.file(at: "build/variables/index.html").readAsString()
-        let expected = """
-        <title>Test Site</title><body>
-        Test Site
-        This is just a test.
-        ../assets/lol.png
-        ../
-        ../assets/
-        Variables
-        /variables
-        A friendly little 🌲
-        </body>
-        """
-
-        XCTAssertEqual(result, expected)
+        var contents = try targetDirectory.file(at: "assets/styles.css").readAsString()
+        XCTAssertEqual(contents, "body { background: '#f09'; }")
+        contents = try targetDirectory.file(at: "assets/js/scripts.js").readAsString()
+        XCTAssertEqual(contents, "console.log('It works!');")
     }
 }

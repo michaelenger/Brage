@@ -28,6 +28,7 @@ public struct CLI {
                     ? arguments[2]
                     : nil
             )
+            let renderer = try Renderer(source: sourceDirectory)
             
             let targetDirectory = try makeWorkingDirectory(
                 arguments.count > 3
@@ -35,8 +36,8 @@ public struct CLI {
                     : sourceDirectory.path + "/build"
             )
             
-			let builder = Builder()
-            try builder.build(source: sourceDirectory, target: targetDirectory)
+            let builder = Builder(source: sourceDirectory, renderer: renderer)
+            try builder.build(target: targetDirectory)
 
 		case "serve":
 			let sourceDirectory = try getWorkingDirectory(
