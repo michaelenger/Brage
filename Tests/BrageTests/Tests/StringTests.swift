@@ -16,6 +16,12 @@ final class StringTests: XCTestCase {
 		XCTAssertEqual("ffffffffffffff".count(of: c), 14)
 		XCTAssertEqual("for the fun of failing".count(of: c), 4)
 	}
+    
+    func testTrimSuffix() {
+        XCTAssertEqual("test".trimSuffix("t"), "tes")
+        XCTAssertEqual("test".trimSuffix("x"), "test")
+        XCTAssertEqual("testing".trimSuffix("ing"), "test")
+    }
 
 	func testTitleified() {
 		XCTAssertEqual("".titleified, "")

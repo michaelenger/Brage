@@ -62,7 +62,7 @@ public struct Server {
 
         let targetFile: String = request.path == "/"
             ? "pages/index"
-            : "pages\(request.path)"
+            : "pages" + request.path.trimSuffix("/")
     
         do {
             var file: File? = nil
