@@ -6,6 +6,7 @@
 
 import Dispatch
 import Files
+import Foundation
 import Swifter
 
 /// Server which provides the templates as compiled HTML.
@@ -13,7 +14,7 @@ public struct Server {
     let renderer: Renderer
     let server: HttpServer
     let sourceDirectory: Folder
-    
+
     /// Initialize the server with the specified source directory.
     ///
     /// - Parameter source: Site directory to serve files from.
@@ -21,12 +22,19 @@ public struct Server {
         self.renderer = renderer
         self.server = HttpServer()
         self.sourceDirectory = source
-        
-        if source.containsSubfolder(named: "assets") {
-            server["/assets/:path"] = shareFilesFromDirectory("\(source.path)/assets")
-        }
+
         // Match any long possible route. This is not the ideal way to handle this, but it's a known limitation of Swifter.
         // TODO: Change this when this issue is solved: https://github.com/httpswift/swifter/issues/405
+
+        if source.containsSubfolder(named: "assets") {
+            server["/assets/*/*/*/*/*/*"] = asset
+            server["/assets/*/*/*/*/*"] = asset
+            server["/assets/*/*/*/*"] = asset
+            server["/assets/*/*/*"] = asset
+            server["/assets/*/*"] = asset
+            server["/assets/*"] = asset
+        }
+
         server["/*/*/*/*/*/*/*"] = respond
         server["/*/*/*/*/*/*"] = respond
         server["/*/*/*/*/*"] = respond
@@ -36,7 +44,7 @@ public struct Server {
         server["/*"] = respond
         server["/"] = respond
     }
-    
+
     /// Start the server, listening for requests at the specified port.
     ///
     /// - Parameter port: Port to listen at.
@@ -53,6 +61,28 @@ public struct Server {
         }
     }
     
+    private func asset(request: HttpRequest) -> HttpResponse {
+        let filePath = sourceDirectory.path + request.path.removingPercentEncoding!
+        if let file = try? filePath.openForReading() {
+            let mimeType = request.path.mimeType()
+            var responseHeader: [String: String] = ["Content-Type": mimeType]
+
+            if let attr = try? FileManager.default.attributesOfItem(atPath: filePath),
+                let fileSize = attr[FileAttributeKey.size] as? UInt64 {
+                responseHeader["Content-Length"] = String(fileSize)
+            }
+
+            Logger.debug("Serving asset: \(request.path)")
+            return .raw(200, "OK", responseHeader, { writer in
+                try? writer.write(file)
+                file.close()
+            })
+        }
+        
+        Logger.error("No asset found for: \(request.path)")
+        return .notFound
+    }
+
     /// Respond to a request.
     ///
     /// - Parameter request: HTTP request to respond to.
@@ -63,7 +93,7 @@ public struct Server {
         let targetFile: String = request.path == "/"
             ? "pages/index"
             : "pages" + request.path.trimSuffix("/")
-    
+
         do {
             var file: File? = nil
             for ext in RendererFileExtensions.allCases {
@@ -77,7 +107,7 @@ public struct Server {
                 Logger.error("No template found for: \(request.path)")
                 return .notFound
             }
-            
+
             let relativePath = file!.path(relativeTo: sourceDirectory)
             Logger.debug("Serving file: \(relativePath)")
 
