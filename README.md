@@ -30,6 +30,7 @@ The config is defined in a `site.yaml` file in the site directory. It defines so
 
 * `title` Title of the site.
 * `description` Description of the site.
+* `keywords` Meta keywords.
 * `image` Social media preview image relative to the assets directory.
 * Any custom data you want to inject into the Stencil templates (see below).
 
@@ -52,6 +53,7 @@ All Stencil template (including the layout template) are renderered with the fol
 * `site` Site meta data.
     * `title` Title of the site (from the site config).
     * `description` Description of the site (from the site config).
+    * `keywords` Meta keywords of the site (from the site config).
     * `image` Social media preview image (from the site config).
     * `root` Relative path to the root directory.
 * `page` Page meta data.

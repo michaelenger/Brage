@@ -9,6 +9,7 @@ import Yaml
 public struct SiteConfig {
 	public let title: String
 	public let description: String?
+    public let keywords: String?
     public let image: String?
     public let data: [String: Any]
 
@@ -27,7 +28,7 @@ public struct SiteConfig {
         for (key, value) in config.dictionary! {
             let key = key.string!
             switch key {
-            case "description", "title", "image":
+            case "title", "description", "keywords", "image":
                 break // just skip it
             default:
                 data[key] = try convert(value)
@@ -37,6 +38,7 @@ public struct SiteConfig {
         return SiteConfig(
             title: config["title"].string!,
             description: config["description"].string,
+            keywords: config["keywords"].string,
             image: config["image"].string,
             data: data
         )

@@ -66,6 +66,7 @@ public struct Renderer {
             site: TemplateSiteData(
                 title: siteConfig.title,
                 description: siteConfig.description,
+                keywords: siteConfig.keywords,
                 image: siteConfig.image,
                 root: rootPath
             ),
@@ -134,6 +135,7 @@ public struct Renderer {
             "site": [
                 "title": data.site.title,
                 "description": data.site.description as Any,
+                "keywords": data.site.keywords as Any,
                 "image": data.site.image as Any,
                 "root": data.site.root,
             ],
@@ -164,6 +166,7 @@ public enum RendererError: Error, Equatable {
 public struct TemplateSiteData {
     public let title: String
     public let description: String?
+    public let keywords: String?
     public let image: String?
     public let root: String
 }
